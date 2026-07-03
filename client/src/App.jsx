@@ -4,11 +4,67 @@ import rouletteImg from "./assets/roulette.png";
 import blackjackImg from "./assets/blackjack.png";
 import pokerImg from "./assets/poker.png";
 
-
+const API_URL = "https://casinomern.onrender.com";
 
 function App() {
   const [showLogin, setShowLogin] = useState(false);
+  const [showLogout, setShowLogout] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
+  const [user, setUser] = useState(null);
+  const [form, setForm] = useState({ username: "", email: "", password: "" });
+  const [message, setMessage] = useState("");
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleAuth = async () => {
+    setMessage("");
+
+    const endpoint = isRegister ? "/api/auth/register" : "/api/auth/login";
+
+    const body = isRegister
+      ? {
+          username: form.username,
+          email: form.email,
+          password: form.password,
+        }
+      : {
+          email: form.email,
+          password: form.password,
+        };
+
+    try {
+      const res = await fetch(`${API_URL}${endpoint}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setMessage(data.message || "Something went wrong.");
+        return;
+      }
+
+      localStorage.setItem("token", data.token);
+      setUser(data.user);
+      setShowLogin(false);
+      setMessage("");
+      setForm({ username: "", email: "", password: "" });
+    } catch (_error) {
+      setMessage("Could not connect to server.");
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+    setShowLogout(false);
+  };
 
   return (
     <div className="casino-page">
@@ -21,9 +77,15 @@ function App() {
           </div>
         </div>
 
-        <button className="login-btn" onClick={() => setShowLogin(true)}>
-          ♙ Login
-        </button>
+        {user ? (
+          <button className="login-btn" onClick={() => setShowLogout(true)}>
+            {user.username} • {user.balance} Credits
+          </button>
+        ) : (
+          <button className="login-btn" onClick={() => setShowLogin(true)}>
+            Login
+          </button>
+        )}
       </nav>
 
       <section className="hero-section">
@@ -31,38 +93,41 @@ function App() {
           <h1>
             PLAY YOUR <span>FAVORITE GAMES</span>
           </h1>
-          <p>Roulette, Blackjack, and Texas Hold'em. Real games. Real excitement.</p>
+          <p>
+            Roulette, Blackjack, and Texas Hold&apos;em. Real games. Real
+            excitement.
+          </p>
           <button className="play-btn">PLAY NOW ❯</button>
         </div>
       </section>
 
       <section className="games-section">
-        <h2>♣ ♦ CHOOSE YOUR GAME ♥ ♠</h2>
+        <h2>CHOOSE YOUR GAME</h2>
 
         <div className="game-grid">
           <GameCard
             image={rouletteImg}
             icon="◎"
             title="ROULETTE"
-             desc="Spin the wheel and test your luck. Will it be red, black, or green?"
-             button="PLAY ROULETTE"
-            />
+            desc="Spin the wheel and test your luck."
+            button="PLAY ROULETTE"
+          />
 
-           <GameCard
-             image={blackjackImg}
-             icon="🃏"
-             title="BLACKJACK"
-             desc="Beat the dealer by getting as close to 21 as you can."
-             button="PLAY BLACKJACK"
-           />
+          <GameCard
+            image={blackjackImg}
+            icon="🃏"
+            title="BLACKJACK"
+            desc="Beat the dealer by getting as close to 21 as you can."
+            button="PLAY BLACKJACK"
+          />
 
-           <GameCard
-             image={pokerImg}
-             icon="♠"
-             title="TEXAS HOLD'EM"
-             desc="The ultimate poker experience. Bluff, bet, and win big."
-             button="PLAY TEXAS HOLD'EM"
-           />
+          <GameCard
+            image={pokerImg}
+            icon="♠"
+            title="TEXAS HOLD&apos;EM"
+            desc="Bluff, bet, and win big."
+            button="PLAY TEXAS HOLD&apos;EM"
+          />
         </div>
       </section>
 
@@ -78,33 +143,71 @@ function App() {
             <div className="tabs">
               <button
                 className={!isRegister ? "active" : ""}
-                onClick={() => setIsRegister(false)}
+                onClick={() => {
+                  setIsRegister(false);
+                  setMessage("");
+                }}
               >
                 Login
               </button>
+
               <button
                 className={isRegister ? "active" : ""}
-                onClick={() => setIsRegister(true)}
+                onClick={() => {
+                  setIsRegister(true);
+                  setMessage("");
+                }}
               >
                 Register
               </button>
             </div>
 
-            <input type="email" placeholder="Email" />
-            <input type="password" placeholder="Password" />
+            {isRegister && (
+              <input
+                name="username"
+                value={form.username}
+                onChange={handleChange}
+                type="text"
+                placeholder="Username"
+              />
+            )}
 
-            {isRegister && <input type="password" placeholder="Confirm Password" />}
+            <input
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              type="email"
+              placeholder="Email"
+            />
 
-            <button className="modal-submit">
+            <input
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              type="password"
+              placeholder="Password"
+            />
+
+            {message && <p className="auth-message">{message}</p>}
+
+            <button className="modal-submit" onClick={handleAuth}>
               {isRegister ? "Create Account" : "Login"}
             </button>
+          </div>
+        </div>
+      )}
 
-            <p className="switch-text">
-              {isRegister ? "Already have an account?" : "Don't have an account?"}
-              <span onClick={() => setIsRegister(!isRegister)}>
-                {isRegister ? " Login" : " Register"}
-              </span>
-            </p>
+      {showLogout && (
+        <div className="modal-overlay">
+          <div className="login-modal">
+            <button className="close-btn" onClick={() => setShowLogout(false)}>
+              ×
+            </button>
+            <h2>Logout?</h2>
+            <p className="switch-text">Do you want to log out of your account?</p>
+            <button className="modal-submit" onClick={handleLogout}>
+              Logout
+            </button>
           </div>
         </div>
       )}
@@ -115,7 +218,6 @@ function App() {
 function GameCard({ image, icon, title, desc, button }) {
   return (
     <div className="game-card">
-
       <div className="card-image">
         <img src={image} alt={title} />
         <div className="card-overlay">
@@ -128,10 +230,8 @@ function GameCard({ image, icon, title, desc, button }) {
         <p>{desc}</p>
         <button>{button} ❯</button>
       </div>
-
     </div>
   );
 }
 
 export default App;
-

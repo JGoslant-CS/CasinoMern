@@ -317,6 +317,12 @@ footer {
         font-weight: bold;
     }
 
+.auth-message {
+    color: #ff7070;
+    text-align: center;
+    font-weight: bold;
+}
+
 @media (max-width: 850px) {
     .game-grid {
         grid-template-columns: 1fr;
