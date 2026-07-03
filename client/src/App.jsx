@@ -10,9 +10,24 @@ function App() {
   const [showLogin, setShowLogin] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
-  const [user, setUser] = useState(null);
   const [form, setForm] = useState({ username: "", email: "", password: "" });
   const [message, setMessage] = useState("");
+
+  const [user, setUser] = useState(() => {
+  const savedUser = localStorage.getItem("user");
+  return savedUser ? JSON.parse(savedUser) : null;
+});
+
+  const handlePlay = () => {
+    if (!user) {
+      setMessage("Please login or register before playing.");
+      setIsRegister(false);
+      setShowLogin(true);
+      return;
+    }
+
+    alert("Game coming soon!");
+  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -51,17 +66,19 @@ function App() {
       }
 
       localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
       setUser(data.user);
       setShowLogin(false);
       setMessage("");
       setForm({ username: "", email: "", password: "" });
-    } catch (_error) {
+    } catch {
       setMessage("Could not connect to server.");
     }
   };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setUser(null);
     setShowLogout(false);
   };
@@ -97,7 +114,9 @@ function App() {
             Roulette, Blackjack, and Texas Hold&apos;em. Real games. Real
             excitement.
           </p>
-          <button className="play-btn">PLAY NOW ❯</button>
+          <button className="play-btn" onClick={handlePlay}>
+            PLAY NOW ❯
+          </button>
         </div>
       </section>
 
@@ -111,6 +130,7 @@ function App() {
             title="ROULETTE"
             desc="Spin the wheel and test your luck."
             button="PLAY ROULETTE"
+            onPlay={handlePlay}
           />
 
           <GameCard
@@ -119,6 +139,7 @@ function App() {
             title="BLACKJACK"
             desc="Beat the dealer by getting as close to 21 as you can."
             button="PLAY BLACKJACK"
+            onPlay={handlePlay}
           />
 
           <GameCard
@@ -127,6 +148,7 @@ function App() {
             title="TEXAS HOLD&apos;EM"
             desc="Bluff, bet, and win big."
             button="PLAY TEXAS HOLD&apos;EM"
+            onPlay={handlePlay}
           />
         </div>
       </section>
@@ -215,7 +237,7 @@ function App() {
   );
 }
 
-function GameCard({ image, icon, title, desc, button }) {
+function GameCard({ image, icon, title, desc, button, onPlay }) {
   return (
     <div className="game-card">
       <div className="card-image">
@@ -228,7 +250,7 @@ function GameCard({ image, icon, title, desc, button }) {
       <div className="card-content">
         <h3>{title}</h3>
         <p>{desc}</p>
-        <button>{button} ❯</button>
+        <button onClick={onPlay}>{button} ❯</button>
       </div>
     </div>
   );
