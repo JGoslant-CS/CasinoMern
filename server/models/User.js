@@ -28,6 +28,26 @@ const userSchema = new mongoose.Schema(
       default: 10,
       min: 0,
     },
+
+    totalWins: {
+      type: Number,
+      default: 0,
+    },
+
+    totalLosses: {
+      type: Number,
+      default: 0,
+    },
+
+    totalGames: {
+      type: Number,
+      default: 0,
+    },
+
+    totalBalanceWon: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,
