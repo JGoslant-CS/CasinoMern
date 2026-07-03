@@ -1,12 +1,16 @@
-﻿import { useState } from "react";
+﻿import { useRef, useState } from "react";
 import "./App.css";
 import rouletteImg from "./assets/roulette.png";
 import blackjackImg from "./assets/blackjack.png";
 import pokerImg from "./assets/poker.png";
+import slotImg from "./assets/slot.png";
+import cautionImg from "./assets/caution.png";
 
 const API_URL = "https://casinomern.onrender.com";
 
 function App() {
+  const gamesRef = useRef(null);
+
   const [showLogin, setShowLogin] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
@@ -14,9 +18,13 @@ function App() {
   const [message, setMessage] = useState("");
 
   const [user, setUser] = useState(() => {
-  const savedUser = localStorage.getItem("user");
-  return savedUser ? JSON.parse(savedUser) : null;
-});
+    const savedUser = localStorage.getItem("user");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
+  const scrollToGames = () => {
+    gamesRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const handlePlay = () => {
     if (!user) {
@@ -114,13 +122,13 @@ function App() {
             Roulette, Blackjack, and Texas Hold&apos;em. Real games. Real
             excitement.
           </p>
-          <button className="play-btn" onClick={handlePlay}>
+          <button className="play-btn" onClick={scrollToGames}>
             PLAY NOW ❯
           </button>
         </div>
       </section>
 
-      <section className="games-section">
+      <section className="games-section" ref={gamesRef}>
         <h2>CHOOSE YOUR GAME</h2>
 
         <div className="game-grid">
@@ -149,6 +157,25 @@ function App() {
             desc="Bluff, bet, and win big."
             button="PLAY TEXAS HOLD&apos;EM"
             onPlay={handlePlay}
+          />
+
+          <GameCard
+            image={slotImg}
+            icon="🎰"
+            title="SLOT MACHINE"
+            desc="Spin the reels and chase the jackpot."
+            button="PLAY SLOTS"
+            onPlay={handlePlay}
+          />
+
+          <GameCard
+            image={cautionImg}
+            icon="🚧"
+            title="COMING SOON..."
+            desc="More casino games are being added soon."
+            button="COMING SOON"
+            onPlay={handlePlay}
+            comingSoon={true}
           />
         </div>
       </section>
@@ -237,9 +264,9 @@ function App() {
   );
 }
 
-function GameCard({ image, icon, title, desc, button, onPlay }) {
+function GameCard({ image, icon, title, desc, button, onPlay, comingSoon }) {
   return (
-    <div className="game-card">
+    <div className={comingSoon ? "game-card coming-soon-card" : "game-card"}>
       <div className="card-image">
         <img src={image} alt={title} />
         <div className="card-overlay">
