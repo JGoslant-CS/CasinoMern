@@ -46,7 +46,7 @@ function App() {
       const data = await res.json();
 
       if (!res.ok) {
-        setMessage(data.message || "Something went wrong.");
+        setMessage(data.error || data.message || "Something went wrong.");
         return;
       }
 
