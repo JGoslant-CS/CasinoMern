@@ -8,8 +8,12 @@ router.post("/bet", async (req, res) => {
   try {
     const { userId, betAmount } = req.body;
 
-    if (!userId || !betAmount) {
+    if (!userId || betAmount === undefined) {
       return res.status(400).json({ message: "Missing userId or betAmount." });
+    }
+
+    if (betAmount < 1 || betAmount > 10) {
+      return res.status(400).json({ message: "Bet must be between 1 and 10 credits." });
     }
 
     const user = await User.findById(userId);
@@ -18,16 +22,16 @@ router.post("/bet", async (req, res) => {
       return res.status(404).json({ message: "User not found." });
     }
 
-    if (user.credits < betAmount) {
+    if (user.balance < betAmount) {
       return res.status(400).json({ message: "Not enough credits." });
     }
 
-    user.credits -= betAmount;
+    user.balance -= betAmount;
     await user.save();
 
     res.json({
       message: "Bet placed.",
-      credits: user.credits,
+      balance: user.balance,
       user,
     });
   } catch (error) {
@@ -51,18 +55,20 @@ router.post("/result", async (req, res) => {
     }
 
     if (won) {
-      user.credits += payout;
+      user.balance += payout;
       user.totalWins += 1;
-      user.totalCreditsWon += payout;
+      user.totalBalanceWon += payout;
     } else {
       user.totalLosses += 1;
     }
+
+    user.totalGames += 1;
 
     await user.save();
 
     res.json({
       message: "Game result saved.",
-      credits: user.credits,
+      balance: user.balance,
       user,
     });
   } catch (error) {
@@ -74,8 +80,8 @@ router.post("/result", async (req, res) => {
 router.get("/leaderboard", async (req, res) => {
   try {
     const leaders = await User.find()
-      .select("username credits totalWins totalCreditsWon")
-      .sort({ credits: -1 })
+      .select("username balance totalWins totalLosses totalGames totalBalanceWon")
+      .sort({ balance: -1 })
       .limit(10);
 
     res.json(leaders);

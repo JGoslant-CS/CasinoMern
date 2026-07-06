@@ -1,16 +1,18 @@
 ﻿import { useRef, useState } from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import "./App.css";
 import rouletteImg from "./assets/roulette.png";
 import blackjackImg from "./assets/blackjack.png";
 import pokerImg from "./assets/poker.png";
 import slotImg from "./assets/slot.png";
 import cautionImg from "./assets/caution.png";
+import SlotsPage from "./pages/SlotsPage";
 
 const API_URL = "https://casinomern.onrender.com";
 
 function App() {
+  const navigate = useNavigate();
   const gamesRef = useRef(null);
-
   const [showLogin, setShowLogin] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
@@ -35,6 +37,17 @@ function App() {
     }
 
     alert("Game coming soon!");
+  };
+
+  const handleSlotsPlay = () => {
+    if (!user) {
+      setMessage("Please login or register before playing.");
+      setIsRegister(false);
+      setShowLogin(true);
+      return;
+    }
+
+    navigate("/slots");
   };
 
   const handleChange = (e) => {
@@ -91,7 +104,7 @@ function App() {
     setShowLogout(false);
   };
 
-  return (
+  const HomePage = (
     <div className="casino-page">
       <nav className="navbar">
         <div className="logo">
@@ -165,7 +178,7 @@ function App() {
             title="SLOT MACHINE"
             desc="Spin the reels and chase the jackpot."
             button="PLAY SLOTS"
-            onPlay={handlePlay}
+            onPlay={handleSlotsPlay}
           />
 
           <GameCard
@@ -261,6 +274,13 @@ function App() {
         </div>
       )}
     </div>
+  );
+
+  return (
+    <Routes>
+      <Route path="/" element={HomePage} />
+      <Route path="/slots" element={<SlotsPage user={user} setUser={setUser} />} />
+    </Routes>
   );
 }
 
