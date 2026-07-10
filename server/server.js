@@ -1,3 +1,4 @@
+import leaderboardRoutes from "./routes/leaderboardRoutes.js";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -32,17 +33,18 @@ app.get("/", (req, res) => {
 // API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/game", gameRoutes);
+app.use("/api/leaderboard", leaderboardRoutes);
 
 // Connect to MongoDB, then start the server
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
-    console.log(" MongoDB Connected");
+    console.log("MongoDB Connected");
 
     app.listen(PORT, () => {
-      console.log(` Server running on port ${PORT}`);
+      console.log(`Server running on port ${PORT}`);
     });
   })
   .catch((err) => {
-    console.error(" MongoDB Connection Error:", err.message);
+    console.error("MongoDB Connection Error:", err.message);
   });
