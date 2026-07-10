@@ -7,6 +7,7 @@ import pokerImg from "./assets/poker.png";
 import slotImg from "./assets/slot.png";
 import cautionImg from "./assets/caution.png";
 import SlotsPage from "./pages/SlotsPage";
+import RoulettePage from "./pages/RoulettePage";
 
 const API_URL = "https://casinomern.onrender.com";
 
@@ -49,6 +50,17 @@ function App() {
 
     navigate("/slots");
   };
+
+  const handleRoulettePlay = () => {
+    if (!user) {
+        setMessage("Please login or register before playing.");
+        setIsRegister(false);
+        setShowLogin(true);
+        return;
+    }
+
+    navigate("/roulette");
+  }; 
 
   const handleSecretBonus = async () => {
     if (!user) {
@@ -208,7 +220,7 @@ function App() {
             title="ROULETTE"
             desc="Spin the wheel and test your luck."
             button="PLAY ROULETTE"
-            onPlay={handlePlay}
+            onPlay={handleRoulettePlay}
           />
 
           <GameCard
@@ -337,6 +349,7 @@ function App() {
     <Routes>
       <Route path="/" element={HomePage} />
       <Route path="/slots" element={<SlotsPage user={user} setUser={setUser} />} />
+      <Route path="/roulette" element={<RoulettePage user={user} setUser={setUser} />} />
     </Routes>
   );
 }
