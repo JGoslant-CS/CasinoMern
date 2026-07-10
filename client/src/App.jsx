@@ -50,6 +50,46 @@ function App() {
     navigate("/slots");
   };
 
+  const handleSecretBonus = async () => {
+    if (!user) {
+      setMessage("Please login or register to claim the bonus.");
+      setIsRegister(false);
+      setShowLogin(true);
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/api/game/bonus`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: user._id || user.id,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Could not add bonus credits.");
+        return;
+      }
+
+      const updatedUser = {
+        ...user,
+        balance: data.balance ?? data.credits,
+      };
+
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+
+      alert(data.message || "Secret bonus found! +10 credits");
+    } catch {
+      alert("Could not connect to the server.");
+    }
+  };
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -109,10 +149,27 @@ function App() {
       <nav className="navbar">
         <div className="logo">
           <span className="logo-icon">♠</span>
+
           <div>
             <h2>CASINO</h2>
             <p>MERN</p>
           </div>
+
+          <span
+            className="logo-icon"
+            onClick={handleSecretBonus}
+            title="Feeling lucky?"
+            role="button"
+            tabIndex={0}
+            style={{ cursor: "pointer" }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                handleSecretBonus();
+              }
+            }}
+          >
+            ♠
+          </span>
         </div>
 
         {user ? (

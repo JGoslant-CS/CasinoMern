@@ -76,6 +76,35 @@ router.post("/result", async (req, res) => {
   }
 });
 
+// Easter egg: add 10 credits
+router.post("/bonus", async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ message: "Missing userId." });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $inc: { balance: 10 } },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    res.json({
+      message: "You found the secret bonus! +10 credits",
+      balance: user.balance,
+    });
+  } catch (error) {
+    console.error("Bonus credit error:", error);
+    res.status(500).json({ message: "Could not add bonus credits." });
+  }
+});
+
 // Leaderboard
 router.get("/leaderboard", async (req, res) => {
   try {
