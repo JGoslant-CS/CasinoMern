@@ -1,6 +1,6 @@
 ﻿import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "..//styles/RoulettePage.css";
+import "../styles/RoulettePage.css";
 
 const API_URL = "https://casinomern.onrender.com";
 
@@ -26,6 +26,10 @@ function getNumberColor(number) {
   return redNumbers.has(number) ? "red" : "black";
 }
 
+function normalizeAngle(angle) {
+  return ((angle % 360) + 360) % 360;
+}
+
 function RoulettePage() {
   const navigate = useNavigate();
 
@@ -37,6 +41,7 @@ function RoulettePage() {
   const [betAmount, setBetAmount] = useState(1);
   const [betType, setBetType] = useState("red");
   const [selectedNumber, setSelectedNumber] = useState(0);
+
   const [message, setMessage] = useState(
     "Choose red, black, or one number."
   );
@@ -44,6 +49,7 @@ function RoulettePage() {
   const [isSpinning, setIsSpinning] = useState(false);
   const [wheelRotation, setWheelRotation] = useState(0);
   const [ballRotation, setBallRotation] = useState(0);
+  const [ballDropping, setBallDropping] = useState(false);
   const [winningNumber, setWinningNumber] = useState(null);
 
   const numberAngle = 360 / rouletteNumbers.length;
@@ -57,10 +63,10 @@ function RoulettePage() {
     }));
   }, [numberAngle]);
 
-  const updateStoredUser = (credits) => {
+  const updateStoredUser = (balance) => {
     const updatedUser = {
       ...user,
-      credits,
+      balance,
     };
 
     setUser(updatedUser);
@@ -84,7 +90,7 @@ function RoulettePage() {
       return;
     }
 
-    if (user.credits < numericBet) {
+    if (user.balance < numericBet) {
       setMessage("You do not have enough credits.");
       return;
     }
@@ -103,6 +109,7 @@ function RoulettePage() {
 
     setIsSpinning(true);
     setWinningNumber(null);
+    setBallDropping(false);
     setMessage("The wheel is spinning...");
 
     try {
@@ -112,7 +119,7 @@ function RoulettePage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId: user._id,
+          userId: user._id || user.id,
           betAmount: numericBet,
           betType,
           selectedNumber:
@@ -122,7 +129,17 @@ function RoulettePage() {
         }),
       });
 
-      const data = await response.json();
+      const responseText = await response.text();
+
+      let data;
+
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        throw new Error(
+          `The server returned an invalid response. Status: ${response.status}`
+        );
+      }
 
       if (!response.ok) {
         throw new Error(data.message || "Roulette request failed.");
@@ -132,44 +149,68 @@ function RoulettePage() {
         data.winningNumber
       );
 
+      if (winningIndex === -1) {
+        throw new Error("The server returned an invalid winning number.");
+      }
+
       /*
-        The pointer is at the top of the wheel.
+        The wheel spins clockwise for appearance.
 
-        We rotate the winning pocket to the pointer while adding
-        several complete spins.
+        The ball spins counterclockwise and finishes at the exact
+        screen position of the server-selected winning pocket.
+
+        The ball—not the pointer—now shows the winning number.
       */
-      const completeWheelSpins = 5 * 360;
-      const targetWheelAngle =
-        completeWheelSpins -
-        winningIndex * numberAngle;
+      const nextWheelRotation =
+        wheelRotation + (5 * 360) + 137;
 
-      const completeBallSpins = 8 * 360;
-      const targetBallAngle =
-        completeBallSpins +
-        winningIndex * numberAngle;
+      const winningPocketAngle =
+        nextWheelRotation + winningIndex * numberAngle;
 
-      setWheelRotation((current) => current + targetWheelAngle);
-      setBallRotation((current) => current + targetBallAngle);
+      const currentBallAngle = normalizeAngle(ballRotation);
+      const targetBallAngle = normalizeAngle(winningPocketAngle);
+
+      const counterClockwiseAdjustment =
+        -normalizeAngle(currentBallAngle - targetBallAngle);
+
+      const nextBallRotation =
+        ballRotation -
+        (7 * 360) +
+        counterClockwiseAdjustment;
+
+      setWheelRotation(nextWheelRotation);
+      setBallRotation(nextBallRotation);
+
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          setBallDropping(true);
+        });
+      });
 
       window.setTimeout(() => {
         setWinningNumber(data.winningNumber);
-        updateStoredUser(data.credits);
+        updateStoredUser(data.balance);
 
         if (data.won) {
           setMessage(
-            `Winner: ${data.winningNumber} ${data.winningColor}. You won ${data.payout} credits!`
+            `The ball landed on ${data.winningNumber} ${data.winningColor}. You won ${data.payout} credits!`
           );
         } else {
           setMessage(
-            `Winner: ${data.winningNumber} ${data.winningColor}. Better luck next time.`
+            `The ball landed on ${data.winningNumber} ${data.winningColor}. Better luck next time.`
           );
         }
 
         setIsSpinning(false);
-      }, 5200);
+      }, 5400);
     } catch (error) {
-      console.error(error);
-      setMessage(error.message || "Could not connect to the server.");
+      console.error("Roulette error:", error);
+
+      setMessage(
+        error.message || "Could not connect to the server."
+      );
+
+      setBallDropping(false);
       setIsSpinning(false);
     }
   };
@@ -187,7 +228,7 @@ function RoulettePage() {
 
         <div className="roulette-user-info">
           <span>{user?.username || "Guest"}</span>
-          <strong>{user?.credits ?? 0} credits</strong>
+          <strong>{user?.balance ?? 0} credits</strong>
         </div>
       </header>
 
@@ -202,10 +243,10 @@ function RoulettePage() {
 
         <div className="roulette-game-layout">
           <section className="roulette-wheel-section">
-            <div className="roulette-pointer" />
-
             <div
-              className="roulette-wheel"
+              className={`roulette-wheel ${
+                isSpinning ? "wheel-spinning" : ""
+              }`}
               style={{
                 transform: `rotate(${wheelRotation}deg)`,
               }}
@@ -239,17 +280,24 @@ function RoulettePage() {
             </div>
 
             <div
-              className="roulette-ball-orbit"
+              className={`roulette-ball-orbit ${
+                ballDropping ? "ball-dropping" : ""
+              }`}
               style={{
                 transform: `rotate(${ballRotation}deg)`,
               }}
             >
-              <div className="roulette-ball" />
+              <div
+                className={`roulette-ball ${
+                  isSpinning ? "ball-bouncing" : ""
+                }`}
+              />
             </div>
 
             {winningNumber !== null && (
               <div className="roulette-winning-display">
-                <span>Winning number</span>
+                <span>The ball landed on</span>
+
                 <strong
                   className={`winning-${getNumberColor(
                     winningNumber
@@ -368,7 +416,7 @@ function RoulettePage() {
 
             <p
               className={`roulette-message ${
-                message.includes("won")
+                message.includes("You won")
                   ? "success-message"
                   : ""
               }`}

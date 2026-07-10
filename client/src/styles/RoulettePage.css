@@ -3,7 +3,7 @@
 	width: 100%;
 	overflow-x: hidden;
 	color: white;
-	background: radial-gradient(circle at top, rgba(0, 102, 255, 0.2), transparent 38%), linear-gradient(145deg, #020817, #06152c 55%, #020611);
+	background: radial-gradient( circle at top, rgba(0, 102, 255, 0.2), transparent 38% ), linear-gradient(145deg, #020817, #06152c 55%, #020611);
 }
 
 .roulette-header {
@@ -30,8 +30,8 @@
 }
 
 	.roulette-back-button:hover {
-		background: #00bfff;
 		color: #021020;
+		background: #00bfff;
 		box-shadow: 0 0 18px rgba(0, 191, 255, 0.65);
 	}
 
@@ -47,10 +47,10 @@
 
 	.roulette-user-info strong {
 		padding: 9px 14px;
+		border: 1px solid rgba(0, 191, 255, 0.4);
 		border-radius: 10px;
 		color: #73e8ff;
 		background: rgba(0, 191, 255, 0.12);
-		border: 1px solid rgba(0, 191, 255, 0.4);
 	}
 
 .roulette-content {
@@ -103,11 +103,16 @@
 	position: relative;
 	width: min(570px, 80vw);
 	aspect-ratio: 1;
-	border-radius: 50%;
 	border: 12px solid #926622;
-	background: radial-gradient(circle, #071426 0 29%, transparent 30%), repeating-conic-gradient( from -4.86deg, #0d1726 0deg 4.86deg, #a61120 4.86deg 9.72deg );
+	border-radius: 50%;
+	background: radial-gradient( circle, #071426 0 29%, transparent 30% ), repeating-conic-gradient( from -4.86deg, #0d1726 0deg 4.86deg, #a61120 4.86deg 9.72deg );
 	box-shadow: 0 0 0 7px #d7a943, 0 0 0 14px #39240b, 0 0 45px rgba(0, 191, 255, 0.4), inset 0 0 45px rgba(0, 0, 0, 0.85);
-	transition: transform 5s cubic-bezier(0.12, 0.62, 0.12, 1);
+	transition: transform 5.2s cubic-bezier(0.12, 0.62, 0.12, 1);
+	will-change: transform;
+}
+
+.wheel-spinning {
+	box-shadow: 0 0 0 7px #d7a943, 0 0 0 14px #39240b, 0 0 65px rgba(0, 191, 255, 0.55), inset 0 0 45px rgba(0, 0, 0, 0.85);
 }
 
 .roulette-pocket-ring {
@@ -122,22 +127,23 @@
 	left: calc(50% - 15px);
 	width: 30px;
 	height: 48%;
-	transform-origin: 50% 100%;
+	padding-top: 8px;
 	display: flex;
 	align-items: flex-start;
 	justify-content: center;
-	padding-top: 8px;
 	box-sizing: border-box;
+	transform-origin: 50% 100%;
 }
 
 	.roulette-pocket span {
-		width: 28px;
-		height: 28px;
+		width: 30px;
+		height: 30px;
 		display: grid;
 		place-items: center;
+		border: 1px solid rgba(255, 255, 255, 0.22);
 		border-radius: 50%;
 		color: white;
-		font-size: 0.74rem;
+		font-size: 0.76rem;
 		font-weight: 800;
 		text-shadow: 0 1px 3px black;
 	}
@@ -157,9 +163,9 @@
 .roulette-inner-ring {
 	position: absolute;
 	inset: 26%;
-	border-radius: 50%;
 	border: 8px solid #c7993f;
-	background: radial-gradient(circle, #0e2e4e 0 38%, #06111f 39% 67%, #b78631 68% 71%, #101722 72%);
+	border-radius: 50%;
+	background: radial-gradient( circle, #0e2e4e 0 38%, #06111f 39% 67%, #b78631 68% 71%, #101722 72% );
 	box-shadow: inset 0 0 28px rgba(0, 0, 0, 0.9), 0 0 18px rgba(0, 0, 0, 0.8);
 }
 
@@ -171,10 +177,10 @@
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+	border: 5px solid #d2a448;
 	border-radius: 50%;
 	color: white;
 	background: radial-gradient(circle, #12669b, #061525 70%);
-	border: 5px solid #d2a448;
 	box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.12), 0 0 20px rgba(0, 0, 0, 0.7);
 }
 
@@ -188,71 +194,135 @@
 		font-size: clamp(0.75rem, 2vw, 1.2rem);
 	}
 
-.roulette-pointer {
-	position: absolute;
-	top: 36px;
-	left: 50%;
-	z-index: 20;
-	width: 0;
-	height: 0;
-	transform: translateX(-50%);
-	border-left: 18px solid transparent;
-	border-right: 18px solid transparent;
-	border-top: 42px solid #f5d46b;
-	filter: drop-shadow(0 0 9px rgba(245, 212, 107, 0.8));
-}
+/*
+  The orbit starts near the outside of the wheel.
 
+  During the spin, its size becomes smaller so the ball appears
+  to spiral inward toward the numbered pockets.
+*/
 .roulette-ball-orbit {
 	position: absolute;
-	width: min(515px, 72vw);
+	z-index: 15;
+	width: min(536px, 75vw);
 	aspect-ratio: 1;
 	border-radius: 50%;
 	pointer-events: none;
-	transition: transform 5s cubic-bezier(0.1, 0.65, 0.15, 1);
+	transition: transform 5.2s cubic-bezier(0.08, 0.64, 0.13, 1), width 5.2s cubic-bezier(0.25, 0.45, 0.15, 1);
+	will-change: transform, width;
 }
 
+	.roulette-ball-orbit.ball-dropping {
+		width: min(494px, 69vw);
+	}
+
+/*
+  Larger ball with stronger lighting and shadow.
+*/
 .roulette-ball {
 	position: absolute;
-	top: -3px;
-	left: calc(50% - 8px);
-	width: 16px;
-	height: 16px;
+	top: -12px;
+	left: calc(50% - 14px);
+	width: 28px;
+	height: 28px;
+	border: 2px solid rgba(255, 255, 255, 0.95);
 	border-radius: 50%;
-	background: radial-gradient(circle at 35% 30%, white, #cfd6df 55%, #6f7784);
-	box-shadow: 0 0 8px white, 0 3px 8px rgba(0, 0, 0, 0.7);
+	background: radial-gradient( circle at 32% 27%, #ffffff 0 14%, #edf1f6 15% 38%, #b4bdca 62%, #5e6875 100% );
+	box-shadow: 0 0 10px rgba(255, 255, 255, 0.95), 0 0 18px rgba(114, 230, 255, 0.55), 0 5px 10px rgba(0, 0, 0, 0.75);
+}
+
+.ball-bouncing {
+	animation: rouletteBallBounce 5.2s ease-in-out forwards;
+}
+
+@keyframes rouletteBallBounce {
+	0% {
+		margin-top: 0;
+		transform: scale(1);
+	}
+
+	60% {
+		margin-top: 0;
+		transform: scale(1);
+	}
+
+	70% {
+		margin-top: 10px;
+		transform: scale(0.97);
+	}
+
+	76% {
+		margin-top: 2px;
+		transform: scale(1.05);
+	}
+
+	82% {
+		margin-top: 15px;
+		transform: scale(0.96);
+	}
+
+	88% {
+		margin-top: 7px;
+		transform: scale(1.03);
+	}
+
+	93% {
+		margin-top: 13px;
+		transform: scale(0.98);
+	}
+
+	100% {
+		margin-top: 11px;
+		transform: scale(1);
+	}
 }
 
 .roulette-winning-display {
 	position: absolute;
-	bottom: 10px;
+	bottom: 5px;
 	left: 50%;
-	min-width: 160px;
+	z-index: 30;
+	min-width: 175px;
 	padding: 13px 20px;
 	transform: translateX(-50%);
 	text-align: center;
-	border-radius: 15px;
 	border: 1px solid rgba(0, 191, 255, 0.45);
-	background: rgba(2, 10, 25, 0.92);
+	border-radius: 15px;
+	background: rgba(2, 10, 25, 0.94);
 	box-shadow: 0 0 25px rgba(0, 191, 255, 0.25);
+	animation: winningNumberAppear 0.35s ease-out;
 }
 
-	.roulette-winning-display span {
-		display: block;
-		margin-bottom: 5px;
-		color: #aebbd0;
-		font-size: 0.8rem;
-		text-transform: uppercase;
-		letter-spacing: 1px;
+@keyframes winningNumberAppear {
+	from {
+		opacity: 0;
+		transform: translate(-50%, 12px) scale(0.85);
 	}
 
-	.roulette-winning-display strong {
-		display: inline-grid;
-		place-items: center;
-		width: 46px;
-		height: 46px;
-		border-radius: 50%;
-		font-size: 1.4rem;
+	to {
+		opacity: 1;
+		transform: translate(-50%, 0) scale(1);
 	}
+}
+
+.roulette-winning-display span {
+	display: block;
+	margin-bottom: 7px;
+	color: #aebbd0;
+	font-size: 0.8rem;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+.roulette-winning-display strong {
+	width: 50px;
+	height: 50px;
+	display: inline-grid;
+	place-items: center;
+	border: 2px solid rgba(255, 255, 255, 0.3);
+	border-radius: 50%;
+	font-size: 1.5rem;
+	box-shadow: 0 0 15px rgba(255, 255, 255, 0.18);
+}
 
 .winning-red {
 	background: #b71224;
@@ -268,8 +338,8 @@
 
 .roulette-controls {
 	padding: 32px;
-	border-radius: 24px;
 	border: 1px solid rgba(0, 191, 255, 0.42);
+	border-radius: 24px;
 	background: rgba(4, 18, 39, 0.86);
 	box-shadow: 0 0 30px rgba(0, 191, 255, 0.18), inset 0 0 30px rgba(255, 255, 255, 0.02);
 }
@@ -290,8 +360,8 @@
 	width: 100%;
 	padding: 14px;
 	box-sizing: border-box;
-	border-radius: 10px;
 	border: 1px solid rgba(0, 191, 255, 0.5);
+	border-radius: 10px;
 	outline: none;
 	color: white;
 	background: #061225;
@@ -318,8 +388,8 @@
 .roulette-choice {
 	min-height: 80px;
 	padding: 12px 7px;
-	border-radius: 12px;
 	border: 2px solid transparent;
+	border-radius: 12px;
 	color: white;
 	cursor: pointer;
 	font-size: 1rem;
@@ -402,9 +472,9 @@
 .roulette-current-bet {
 	margin: 22px 0;
 	padding: 15px;
+	border: 1px solid rgba(0, 191, 255, 0.22);
 	border-radius: 12px;
 	background: rgba(0, 191, 255, 0.08);
-	border: 1px solid rgba(0, 191, 255, 0.22);
 }
 
 	.roulette-current-bet span {
@@ -489,15 +559,18 @@
 	}
 
 	.roulette-wheel-section {
-		min-height: 450px;
+		min-height: 460px;
 	}
 
-	.roulette-pointer {
-		top: 23px;
+	.roulette-ball {
+		top: -10px;
+		left: calc(50% - 11px);
+		width: 22px;
+		height: 22px;
 	}
 
 	.roulette-winning-display {
-		bottom: -5px;
+		bottom: -10px;
 	}
 
 	.roulette-controls {
