@@ -23,9 +23,22 @@ const blackjackSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    splitHand: {
+      type: Array,
+      default: null,
+    },
+    activeHand: {
+      type: String,
+      enum: ["playerHand", "splitHand"],
+      default: "playerHand",
+    },
+    splitBetAmount: {
+      type: Number,
+      default: 0,
+    },
     status: {
       type: String,
-      enum: ["active", "player_won", "dealer_won", "push", "blackjack"],
+      enum: ["active", "player_won", "dealer_won", "push", "blackjack", "split_active", "finished"],
       default: "active",
     },
   },

@@ -388,13 +388,22 @@ function App() {
   );
 
   return (
-    <Routes>
-      <Route path="/" element={HomePage} />
-      <Route path="/slots" element={<SlotsPage user={user} setUser={setUser} />} />
-      <Route path="/roulette" element={<RoulettePage user={user} setUser={setUser} />} />
-      <Route path="/leaderboard" element={<LeaderboardPage />} />
-      <Route path="/blackjack" element={<BlackjackPage user={user} setUser={setUser} />} />
-    </Routes>
+    <>
+      <div className="fireworks-container">
+        <div className="firework"></div>
+        <div className="firework"></div>
+        <div className="firework"></div>
+        <div className="firework"></div>
+        <div className="firework"></div>
+      </div>
+      <Routes>
+        <Route path="/" element={HomePage} />
+        <Route path="/slots" element={<SlotsPage user={user} setUser={setUser} />} />
+        <Route path="/roulette" element={<RoulettePage user={user} setUser={setUser} />} />
+        <Route path="/leaderboard" element={<LeaderboardPage />} />
+        <Route path="/blackjack" element={<BlackjackPage user={user} setUser={setUser} />} />
+      </Routes>
+    </>
   );
 }
 

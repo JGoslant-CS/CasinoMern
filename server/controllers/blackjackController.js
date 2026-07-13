@@ -138,28 +138,51 @@ export const hit = async (req, res) => {
     const { gameId } = req.body;
     
     const game = await Blackjack.findById(gameId);
-    if (!game || game.status !== "active") {
+    if (!game || (game.status !== "active" && game.status !== "split_active")) {
       return res.status(400).json({ message: "Game not found or already finished." });
     }
 
-    game.playerHand.push(game.deck.pop());
-    const playerValue = calculateHandValue(game.playerHand);
-
-    let payout = 0;
-    if (playerValue > 21) {
-      game.status = "dealer_won";
-      const user = await User.findById(game.userId);
-      user.totalLosses += 1;
-      await user.save();
+    let activeHandArr = game.activeHand === "playerHand" ? game.playerHand : game.splitHand;
+    activeHandArr.push(game.deck.pop());
+    
+    if (game.activeHand === "playerHand") {
+        game.playerHand = activeHandArr;
+        game.markModified('playerHand');
+    } else {
+        game.splitHand = activeHandArr;
+        game.markModified('splitHand');
     }
 
-    game.markModified('playerHand');
+    const currentValue = calculateHandValue(activeHandArr);
+
+    if (currentValue > 21) {
+      if (game.splitHand && game.activeHand === "playerHand") {
+         // Bust on first hand of split, move to next
+         game.activeHand = "splitHand";
+      } else {
+         // Bust on normal hand or second hand of split. Dealer wins this hand.
+         // Wait for stand() logic to resolve payouts if there's a split.
+         // If no split, game is over.
+         if (!game.splitHand) {
+            game.status = "dealer_won";
+            const user = await User.findById(game.userId);
+            user.totalLosses += 1;
+            await user.save();
+         } else if (game.activeHand === "splitHand") {
+            // Both hands played. We need to evaluate against dealer, so we just set status to active and let them stand to trigger dealer logic.
+            // Or trigger dealer logic here if we wanted. For simplicity, we just leave it split_active and force a stand.
+         }
+      }
+    }
+
     game.markModified('deck');
     await game.save();
 
     res.status(200).json({
       playerHand: game.playerHand,
-      dealerHand: game.status === "active" ? [game.dealerHand[0], { suit: "hidden", value: "hidden" }] : game.dealerHand,
+      splitHand: game.splitHand,
+      activeHand: game.activeHand,
+      dealerHand: ["active", "split_active"].includes(game.status) ? [game.dealerHand[0], { suit: "hidden", value: "hidden" }] : game.dealerHand,
       status: game.status,
     });
 
@@ -174,8 +197,21 @@ export const stand = async (req, res) => {
     const { gameId } = req.body;
 
     const game = await Blackjack.findById(gameId);
-    if (!game || game.status !== "active") {
+    if (!game || (game.status !== "active" && game.status !== "split_active")) {
       return res.status(400).json({ message: "Game not found or already finished." });
+    }
+    
+    // If we have a split hand and are standing on the first hand, just switch active hand.
+    if (game.splitHand && game.activeHand === "playerHand") {
+        game.activeHand = "splitHand";
+        await game.save();
+        return res.status(200).json({
+            playerHand: game.playerHand,
+            splitHand: game.splitHand,
+            activeHand: game.activeHand,
+            dealerHand: [game.dealerHand[0], { suit: "hidden", value: "hidden" }],
+            status: game.status,
+        });
     }
 
     let dealerValue = calculateHandValue(game.dealerHand);
@@ -186,37 +222,58 @@ export const stand = async (req, res) => {
       dealerValue = calculateHandValue(game.dealerHand);
     }
 
+    const resolveHand = (handValue, bet) => {
+        if (handValue > 21) return { status: "dealer_won", payout: 0 };
+        if (dealerValue > 21 || handValue > dealerValue) return { status: "player_won", payout: bet * 2 };
+        if (handValue < dealerValue) return { status: "dealer_won", payout: 0 };
+        return { status: "push", payout: bet };
+    };
+
     const playerValue = calculateHandValue(game.playerHand);
+    const res1 = resolveHand(playerValue, game.betAmount);
     
-    let payout = 0;
-    
-    if (dealerValue > 21 || playerValue > dealerValue) {
-      game.status = "player_won";
-      payout = game.betAmount * 2;
-    } else if (playerValue < dealerValue) {
-      game.status = "dealer_won";
-    } else {
-      game.status = "push";
-      payout = game.betAmount;
+    let totalPayout = res1.payout;
+    let netLosses = 0;
+    let netWins = 0;
+
+    if (res1.status === "dealer_won") netLosses++;
+    if (res1.status === "player_won") netWins++;
+
+    let finalStatus = res1.status;
+
+    if (game.splitHand) {
+        const splitValue = calculateHandValue(game.splitHand);
+        const res2 = resolveHand(splitValue, game.splitBetAmount);
+        totalPayout += res2.payout;
+        
+        if (res2.status === "dealer_won") netLosses++;
+        if (res2.status === "player_won") netWins++;
+        
+        finalStatus = "finished"; // When split, individual status is complex, just mark finished
     }
 
+    game.status = finalStatus;
     game.markModified('dealerHand');
     game.markModified('deck');
     await game.save();
 
     const user = await User.findById(game.userId);
-    if (payout > 0) {
-      user.balance += payout;
-      if (game.status === "player_won") user.totalWins += 1;
-      user.totalBalanceWon += payout - game.betAmount;
+    if (totalPayout > 0) {
+      user.balance += totalPayout;
+      user.totalWins += netWins;
+      user.totalBalanceWon += totalPayout - (game.betAmount + game.splitBetAmount);
       await user.save();
-    } else if (game.status === "dealer_won") {
-      user.totalLosses += 1;
+    }
+    
+    if (netLosses > 0) {
+      user.totalLosses += netLosses;
       await user.save();
     }
 
     res.status(200).json({
       playerHand: game.playerHand,
+      splitHand: game.splitHand,
+      activeHand: game.activeHand,
       dealerHand: game.dealerHand,
       status: game.status,
       user: {
@@ -230,4 +287,98 @@ export const stand = async (req, res) => {
     console.error("Blackjack Stand Error:", error);
     res.status(500).json({ message: "Server error." });
   }
+};
+
+export const doubleHand = async (req, res) => {
+    try {
+        const { gameId } = req.body;
+        
+        const game = await Blackjack.findById(gameId);
+        if (!game || game.status !== "active" || game.playerHand.length !== 2) {
+            return res.status(400).json({ message: "Cannot double down right now." });
+        }
+
+        const user = await User.findById(game.userId);
+        if (user.balance < game.betAmount) {
+            return res.status(400).json({ message: "Not enough credits to double down." });
+        }
+
+        // Deduct another betAmount
+        user.balance -= game.betAmount;
+        await user.save();
+        
+        game.betAmount *= 2;
+        game.playerHand.push(game.deck.pop());
+        game.markModified('playerHand');
+        game.markModified('deck');
+        await game.save();
+
+        // Automatically stand
+        req.body.gameId = game._id;
+        return stand(req, res);
+
+    } catch (error) {
+        console.error("Double Down Error:", error);
+        res.status(500).json({ message: "Server error." });
+    }
+};
+
+export const splitHand = async (req, res) => {
+    try {
+        const { gameId } = req.body;
+        
+        const game = await Blackjack.findById(gameId);
+        if (!game || game.status !== "active" || game.playerHand.length !== 2) {
+            return res.status(400).json({ message: "Cannot split right now." });
+        }
+
+        const c1 = game.playerHand[0].value;
+        const c2 = game.playerHand[1].value;
+
+        // Ensure cards have same value (10, J, Q, K are all 10s usually, but for simplicity strict equality is fine or value equality)
+        const v1 = ["J", "Q", "K"].includes(c1) ? "10" : c1;
+        const v2 = ["J", "Q", "K"].includes(c2) ? "10" : c2;
+
+        if (v1 !== v2) {
+            return res.status(400).json({ message: "Cards must be of equal value to split." });
+        }
+
+        const user = await User.findById(game.userId);
+        if (user.balance < game.betAmount) {
+            return res.status(400).json({ message: "Not enough credits to split." });
+        }
+
+        // Deduct another betAmount
+        user.balance -= game.betAmount;
+        await user.save();
+
+        game.splitBetAmount = game.betAmount;
+        game.splitHand = [game.playerHand.pop(), game.deck.pop()];
+        game.playerHand.push(game.deck.pop());
+        
+        game.status = "split_active";
+        game.activeHand = "playerHand";
+
+        game.markModified('playerHand');
+        game.markModified('splitHand');
+        game.markModified('deck');
+        await game.save();
+
+        res.status(200).json({
+            playerHand: game.playerHand,
+            splitHand: game.splitHand,
+            activeHand: game.activeHand,
+            dealerHand: [game.dealerHand[0], { suit: "hidden", value: "hidden" }],
+            status: game.status,
+            user: {
+                _id: user._id,
+                username: user.username,
+                balance: user.balance,
+            },
+        });
+
+    } catch (error) {
+        console.error("Split Error:", error);
+        res.status(500).json({ message: "Server error." });
+    }
 };

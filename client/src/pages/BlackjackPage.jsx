@@ -47,10 +47,13 @@ function BlackjackPage({ user, setUser }) {
   const [betAmount, setBetAmount] = useState(1);
   const [gameId, setGameId] = useState(null);
   const [playerHand, setPlayerHand] = useState([]);
+  const [splitHand, setSplitHand] = useState(null);
+  const [activeHand, setActiveHand] = useState("playerHand");
   const [dealerHand, setDealerHand] = useState([]);
-  const [status, setStatus] = useState("idle"); // idle, active, player_won, dealer_won, push, blackjack
+  const [status, setStatus] = useState("idle"); // idle, active, split_active, finished, player_won, dealer_won, push, blackjack
   const [message, setMessage] = useState("Place your bet and deal!");
   const [loading, setLoading] = useState(false);
+  const [showExplosion, setShowExplosion] = useState(false);
 
   const calculateHandValue = (hand) => {
     let value = 0;
@@ -73,8 +76,10 @@ function BlackjackPage({ user, setUser }) {
     return value;
   };
 
-  const getStatusMessage = (newStatus, pValue, dValue) => {
-    if (newStatus === "active") return "Hit or Stand?";
+  const getStatusMessage = (newStatus, pValue, dValue, sValue) => {
+    if (newStatus === "active") return "Hit, Stand, or Double?";
+    if (newStatus === "split_active") return `Playing ${activeHand === 'playerHand' ? 'Hand 1' : 'Hand 2'}...`;
+    if (newStatus === "finished") return "Game Over - Check hands for results.";
     if (newStatus === "blackjack") return "BLACKJACK! You win 3:2 payout!";
     if (newStatus === "player_won") return "You win!";
     if (newStatus === "dealer_won") {
@@ -83,6 +88,13 @@ function BlackjackPage({ user, setUser }) {
     }
     if (newStatus === "push") return "Push! Bet returned.";
     return "";
+  };
+
+  const handleStatusEffects = (newStatus) => {
+      if (newStatus === "player_won" || newStatus === "blackjack" || newStatus === "finished") {
+          setShowExplosion(true);
+          setTimeout(() => setShowExplosion(false), 2000);
+      }
   };
 
   const deal = async () => {
@@ -108,6 +120,8 @@ function BlackjackPage({ user, setUser }) {
     setUser({ ...user, balance: user.balance - betAmount });
     setPlayerHand([]);
     setDealerHand([]);
+    setSplitHand(null);
+    setActiveHand("playerHand");
 
     try {
       const res = await fetch(`${API_URL}/api/game/blackjack/start`, {
@@ -130,13 +144,16 @@ function BlackjackPage({ user, setUser }) {
       setGameId(data.gameId);
       setPlayerHand(data.playerHand);
       setDealerHand(data.dealerHand);
+      setSplitHand(data.splitHand || null);
+      setActiveHand(data.activeHand || "playerHand");
       setStatus(data.status);
       setUser(data.user);
       localStorage.setItem("user", JSON.stringify(data.user));
       
       const pValue = calculateHandValue(data.playerHand);
       const dValue = calculateHandValue(data.dealerHand);
-      setMessage(getStatusMessage(data.status, pValue, dValue));
+      setMessage(getStatusMessage(data.status, pValue, dValue, 0));
+      handleStatusEffects(data.status);
       
     } catch {
       setMessage("Could not connect to server.");
@@ -146,7 +163,7 @@ function BlackjackPage({ user, setUser }) {
   };
 
   const hit = async () => {
-    if (!gameId || status !== "active") return;
+    if (!gameId || (status !== "active" && status !== "split_active")) return;
     setLoading(true);
 
     try {
@@ -165,11 +182,14 @@ function BlackjackPage({ user, setUser }) {
 
       setPlayerHand(data.playerHand);
       setDealerHand(data.dealerHand);
+      setSplitHand(data.splitHand || null);
+      setActiveHand(data.activeHand || "playerHand");
       setStatus(data.status);
       
       const pValue = calculateHandValue(data.playerHand);
+      const sValue = data.splitHand ? calculateHandValue(data.splitHand) : 0;
       const dValue = calculateHandValue(data.dealerHand);
-      setMessage(getStatusMessage(data.status, pValue, dValue));
+      setMessage(getStatusMessage(data.status, pValue, dValue, sValue));
       
     } catch {
       setMessage("Could not connect to server.");
@@ -178,7 +198,7 @@ function BlackjackPage({ user, setUser }) {
   };
 
   const stand = async () => {
-    if (!gameId || status !== "active") return;
+    if (!gameId || (status !== "active" && status !== "split_active")) return;
     setLoading(true);
 
     try {
@@ -197,13 +217,19 @@ function BlackjackPage({ user, setUser }) {
 
       setPlayerHand(data.playerHand);
       setDealerHand(data.dealerHand);
+      setSplitHand(data.splitHand || null);
+      setActiveHand(data.activeHand || "playerHand");
       setStatus(data.status);
-      setUser(data.user);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      if (data.user) {
+        setUser(data.user);
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
       
       const pValue = calculateHandValue(data.playerHand);
+      const sValue = data.splitHand ? calculateHandValue(data.splitHand) : 0;
       const dValue = calculateHandValue(data.dealerHand);
-      setMessage(getStatusMessage(data.status, pValue, dValue));
+      setMessage(getStatusMessage(data.status, pValue, dValue, sValue));
+      handleStatusEffects(data.status);
 
     } catch {
       setMessage("Could not connect to server.");
@@ -211,11 +237,91 @@ function BlackjackPage({ user, setUser }) {
     setLoading(false);
   };
 
+  const doubleDown = async () => {
+      if (!gameId || status !== "active" || playerHand.length !== 2) return;
+      setLoading(true);
+      try {
+          const res = await fetch(`${API_URL}/api/game/blackjack/double`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ gameId }),
+          });
+
+          const data = await res.json();
+          if (!res.ok) {
+              setMessage(data.message || "Error doubling down.");
+              setLoading(false);
+              return;
+          }
+
+          setPlayerHand(data.playerHand);
+          setDealerHand(data.dealerHand);
+          setStatus(data.status);
+          if (data.user) {
+              setUser(data.user);
+              localStorage.setItem("user", JSON.stringify(data.user));
+          }
+
+          const pValue = calculateHandValue(data.playerHand);
+          const dValue = calculateHandValue(data.dealerHand);
+          setMessage(getStatusMessage(data.status, pValue, dValue, 0));
+          handleStatusEffects(data.status);
+      } catch {
+          setMessage("Could not connect to server.");
+      }
+      setLoading(false);
+  };
+
+  const split = async () => {
+      if (!gameId || status !== "active" || playerHand.length !== 2) return;
+      setLoading(true);
+      try {
+          const res = await fetch(`${API_URL}/api/game/blackjack/split`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ gameId }),
+          });
+
+          const data = await res.json();
+          if (!res.ok) {
+              setMessage(data.message || "Error splitting.");
+              setLoading(false);
+              return;
+          }
+
+          setPlayerHand(data.playerHand);
+          setDealerHand(data.dealerHand);
+          setSplitHand(data.splitHand);
+          setActiveHand(data.activeHand);
+          setStatus(data.status);
+          if (data.user) {
+              setUser(data.user);
+              localStorage.setItem("user", JSON.stringify(data.user));
+          }
+
+          const pValue = calculateHandValue(data.playerHand);
+          const dValue = calculateHandValue(data.dealerHand);
+          setMessage(getStatusMessage(data.status, pValue, dValue, 0));
+      } catch {
+          setMessage("Could not connect to server.");
+      }
+      setLoading(false);
+  };
+
   const pValue = calculateHandValue(playerHand);
+  const sValue = splitHand ? calculateHandValue(splitHand) : 0;
   const dValue = calculateHandValue(dealerHand);
+
+  const canDouble = status === "active" && playerHand.length === 2 && user?.balance >= betAmount;
+  
+  const canSplit = status === "active" && playerHand.length === 2 && 
+      (["J", "Q", "K", "10"].includes(playerHand[0]?.value) ? 10 : playerHand[0]?.value) === 
+      (["J", "Q", "K", "10"].includes(playerHand[1]?.value) ? 10 : playerHand[1]?.value) && 
+      user?.balance >= betAmount;
 
   return (
     <div className="casino-page blackjack-page">
+      {showExplosion && <div className="win-explosion"></div>}
       <nav className="navbar">
         <div className="logo" onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
           <span className="logo-icon">♠</span>
@@ -250,15 +356,30 @@ function BlackjackPage({ user, setUser }) {
             <h2>{message}</h2>
           </div>
 
-          <div className="player-area">
-            <h3 className="hand-label">Your Hand {pValue > 0 ? `(${pValue})` : ""}</h3>
-            <div className="hand">
-              {playerHand.map((card, idx) => (
-                <div key={idx} className="card-wrapper">
-                  <Card card={card} />
+          <div className="player-hands-container">
+              <div className={`player-area ${splitHand && activeHand === "playerHand" ? "active-hand-indicator" : ""}`}>
+                <h3 className="hand-label">Your Hand {pValue > 0 ? `(${pValue})` : ""}</h3>
+                <div className="hand">
+                  {playerHand.map((card, idx) => (
+                    <div key={`p1-${idx}`} className="card-wrapper">
+                      <Card card={card} />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+
+              {splitHand && (
+                  <div className={`player-area split-area ${activeHand === "splitHand" ? "active-hand-indicator" : ""}`}>
+                    <h3 className="hand-label">Split Hand {sValue > 0 ? `(${sValue})` : ""}</h3>
+                    <div className="hand">
+                      {splitHand.map((card, idx) => (
+                        <div key={`s2-${idx}`} className="card-wrapper">
+                          <Card card={card} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+              )}
           </div>
         </div>
 
@@ -288,7 +409,7 @@ function BlackjackPage({ user, setUser }) {
           </div>
 
           <div className="action-controls">
-            {status === "active" ? (
+            {status === "active" || status === "split_active" ? (
               <>
                 <button className="action-btn hit-btn" onClick={hit} disabled={loading}>
                   Hit
@@ -296,6 +417,16 @@ function BlackjackPage({ user, setUser }) {
                 <button className="action-btn stand-btn" onClick={stand} disabled={loading}>
                   Stand
                 </button>
+                {status === "active" && canDouble && (
+                    <button className="action-btn double-btn" onClick={doubleDown} disabled={loading}>
+                      Double
+                    </button>
+                )}
+                {status === "active" && canSplit && (
+                    <button className="action-btn split-btn" onClick={split} disabled={loading}>
+                      Split
+                    </button>
+                )}
               </>
             ) : (
               <button className="action-btn deal-btn" onClick={deal} disabled={loading}>

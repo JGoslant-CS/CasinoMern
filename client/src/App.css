@@ -357,3 +357,79 @@ footer {
         padding: 35px 25px;
     }
 }
+
+/* Fireworks Animations */
+.fireworks-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.firework {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    box-shadow: 0 0 10px 2px white, 
+                0 0 20px 5px var(--color, gold), 
+                0 0 40px 10px var(--color, gold);
+    animation: explode 3s ease-out infinite;
+    opacity: 0;
+    filter: blur(8px);
+}
+
+.firework:nth-child(1) { top: 20%; left: 30%; --color: #ff00ff; animation-delay: 0s; }
+.firework:nth-child(2) { top: 40%; left: 70%; --color: #00ffff; animation-delay: 1.5s; }
+.firework:nth-child(3) { top: 10%; left: 80%; --color: #ff0000; animation-delay: 0.8s; }
+.firework:nth-child(4) { top: 60%; left: 20%; --color: #00ff00; animation-delay: 2.2s; }
+.firework:nth-child(5) { top: 30%; left: 50%; --color: #ffff00; animation-delay: 0.4s; }
+
+@keyframes explode {
+    0% {
+        transform: scale(0.1);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(30);
+        opacity: 0;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Big Win Explosion */
+.win-explosion {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    box-shadow: 0 0 50px 20px white, 
+                0 0 100px 50px gold, 
+                0 0 200px 100px orange;
+    animation: bigExplode 2s ease-out forwards;
+    z-index: 100;
+    pointer-events: none;
+    filter: blur(10px);
+}
+
+@keyframes bigExplode {
+    0% {
+        transform: translate(-50%, -50%) scale(0.1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(100);
+        opacity: 0;
+    }
+}
