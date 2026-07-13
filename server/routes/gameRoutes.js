@@ -1,5 +1,6 @@
 import express from "express";
 import User from "../models/User.js";
+import { startGame, hit, stand } from "../controllers/blackjackController.js";
 
 const router = express.Router();
 
@@ -333,5 +334,10 @@ router.get("/leaderboard", async (req, res) => {
     res.status(500).json({ message: "Server error loading leaderboard." });
   }
 });
+
+// Blackjack
+router.post("/blackjack/start", startGame);
+router.post("/blackjack/hit", hit);
+router.post("/blackjack/stand", stand);
 
 export default router;

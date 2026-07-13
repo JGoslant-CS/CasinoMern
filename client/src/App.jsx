@@ -9,6 +9,7 @@ import cautionImg from "./assets/caution.png";
 import SlotsPage from "./pages/SlotsPage";
 import RoulettePage from "./pages/RoulettePage";
 import LeaderboardPage from "./pages/LeaderboardPage";
+import BlackjackPage from "./pages/BlackjackPage";
 
 const API_URL = "https://casinomern.onrender.com";
 
@@ -30,6 +31,9 @@ function App() {
         break;
       case "/leaderboard":
         document.title = "Casino MERN - Leaderboard";
+        break;
+      case "/blackjack":
+        document.title = "Casino MERN - Blackjack";
         break;
       default:
         document.title = "Casino MERN";
@@ -59,6 +63,17 @@ function App() {
     }
 
     alert("Game coming soon!");
+  };
+
+  const handleBlackjackPlay = () => {
+    if (!user) {
+      setMessage("Please login or register before playing.");
+      setIsRegister(false);
+      setShowLogin(true);
+      return;
+    }
+
+    navigate("/blackjack");
   };
 
   const handleSlotsPlay = () => {
@@ -256,7 +271,7 @@ function App() {
             title="BLACKJACK"
             desc="Beat the dealer by getting as close to 21 as you can."
             button="PLAY BLACKJACK"
-            onPlay={handlePlay}
+            onPlay={handleBlackjackPlay}
           />
 
           <GameCard
@@ -378,6 +393,7 @@ function App() {
       <Route path="/slots" element={<SlotsPage user={user} setUser={setUser} />} />
       <Route path="/roulette" element={<RoulettePage user={user} setUser={setUser} />} />
       <Route path="/leaderboard" element={<LeaderboardPage />} />
+      <Route path="/blackjack" element={<BlackjackPage user={user} setUser={setUser} />} />
     </Routes>
   );
 }
