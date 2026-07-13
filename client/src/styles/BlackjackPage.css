@@ -184,6 +184,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 40px 0;
 }
 .center-message h2 {
   background: rgba(0, 0, 0, 0.5);
@@ -214,8 +215,8 @@
   align-items: center !important;
   justify-content: center !important;
   gap: 10px !important;
-  flex-wrap: wrap !important;
-  max-width: 680px !important;
+  flex-wrap: nowrap !important;
+  max-width: 850px !important;
   padding: 15px !important;
   background: rgba(0, 0, 0, 0.4) !important;
   border-radius: 16px !important;

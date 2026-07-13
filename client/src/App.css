@@ -421,7 +421,7 @@ footer {
                 0 0 100px 50px gold, 
                 0 0 200px 100px orange;
     animation: bigExplode 2s ease-out forwards;
-    z-index: 100;
+    z-index: 0;
     pointer-events: none;
     filter: blur(10px);
 }
@@ -429,10 +429,10 @@ footer {
 @keyframes bigExplode {
     0% {
         transform: translate(-50%, -50%) scale(0.1);
-        opacity: 1;
+        opacity: 0.8;
     }
     100% {
-        transform: translate(-50%, -50%) scale(100);
+        transform: translate(-50%, -50%) scale(15);
         opacity: 0;
     }
 }

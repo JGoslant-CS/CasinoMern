@@ -387,17 +387,17 @@ function BlackjackPage({ user, setUser }) {
           <div className="bet-controls">
             <button 
               className="bet-adjust-btn"
-              onClick={() => setBetAmount(Math.max(1, betAmount - 50))}
+              onClick={() => setBetAmount(betAmount <= 50 ? 1 : betAmount - 50)}
               disabled={status === "active" || loading}
             >-50</button>
             <button 
               className="bet-adjust-btn"
-              onClick={() => setBetAmount(Math.max(1, betAmount - 25))}
+              onClick={() => setBetAmount(betAmount <= 25 ? 1 : betAmount - 25)}
               disabled={status === "active" || loading}
             >-25</button>
             <button 
               className="bet-adjust-btn"
-              onClick={() => setBetAmount(Math.max(1, betAmount - 10))}
+              onClick={() => setBetAmount(betAmount <= 10 ? 1 : betAmount - 10)}
               disabled={status === "active" || loading}
             >-10</button>
             <button 
@@ -413,17 +413,17 @@ function BlackjackPage({ user, setUser }) {
             >+1</button>
             <button 
               className="bet-adjust-btn"
-              onClick={() => setBetAmount(Math.min(100, betAmount + 10))}
+              onClick={() => setBetAmount(betAmount < 10 ? 10 : Math.min(100, betAmount + 10))}
               disabled={status === "active" || loading}
             >+10</button>
             <button 
               className="bet-adjust-btn"
-              onClick={() => setBetAmount(Math.min(100, betAmount + 25))}
+              onClick={() => setBetAmount(betAmount < 25 ? 25 : Math.min(100, betAmount + 25))}
               disabled={status === "active" || loading}
             >+25</button>
             <button 
               className="bet-adjust-btn"
-              onClick={() => setBetAmount(Math.min(100, betAmount + 50))}
+              onClick={() => setBetAmount(betAmount < 50 ? 50 : Math.min(100, betAmount + 50))}
               disabled={status === "active" || loading}
             >+50</button>
           </div>
