@@ -8,6 +8,7 @@ import slotImg from "./assets/slot.png";
 import cautionImg from "./assets/caution.png";
 import SlotsPage from "./pages/SlotsPage";
 import RoulettePage from "./pages/RoulettePage";
+import LeaderboardPage from "./pages/LeaderboardPage";
 
 const API_URL = "https://casinomern.onrender.com";
 
@@ -26,6 +27,9 @@ function App() {
         break;
       case "/roulette":
         document.title = "Casino MERN - European Roulette";
+        break;
+      case "/leaderboard":
+        document.title = "Casino MERN - Leaderboard";
         break;
       default:
         document.title = "Casino MERN";
@@ -201,15 +205,21 @@ function App() {
           </span>
         </div>
 
-        {user ? (
-          <button className="login-btn" onClick={() => setShowLogout(true)}>
-            {user.username} • {user.balance} Credits
+        <div className="nav-actions" style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+          <button className="leaderboard-btn" onClick={() => navigate("/leaderboard")}>
+            🏆 Leaderboard
           </button>
-        ) : (
-          <button className="login-btn" onClick={() => setShowLogin(true)}>
-            Login
-          </button>
-        )}
+
+          {user ? (
+            <button className="login-btn" onClick={() => setShowLogout(true)}>
+              {user.username} • {user.balance} Credits
+            </button>
+          ) : (
+            <button className="login-btn" onClick={() => setShowLogin(true)}>
+              Login
+            </button>
+          )}
+        </div>
       </nav>
 
       <section className="hero-section">
@@ -367,6 +377,7 @@ function App() {
       <Route path="/" element={HomePage} />
       <Route path="/slots" element={<SlotsPage user={user} setUser={setUser} />} />
       <Route path="/roulette" element={<RoulettePage user={user} setUser={setUser} />} />
+      <Route path="/leaderboard" element={<LeaderboardPage />} />
     </Routes>
   );
 }

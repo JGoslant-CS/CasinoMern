@@ -1,0 +1,219 @@
+.leaderboard-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.leaderboard-nav {
+  /* Inherits from App.css .navbar */
+}
+
+.back-home-btn-nav {
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+}
+
+.back-home-btn-nav:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.leaderboard-container {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 0 20px;
+  width: 100%;
+}
+
+.leaderboard-title {
+  text-align: center;
+  font-size: 3rem;
+  margin-bottom: 5px;
+  text-shadow: 0 0 15px rgba(0, 191, 255, 0.4);
+}
+
+.leaderboard-title span {
+  background: linear-gradient(90deg, #00bfff, #8f4dff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.leaderboard-subtitle {
+  text-align: center;
+  color: #aaa;
+  margin-bottom: 40px;
+  font-size: 1.1rem;
+}
+
+.top-three-grid {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 50px;
+  align-items: flex-end; /* Align bottoms so 1st place can stick out up top */
+}
+
+.top-player-card {
+  background: rgba(15, 18, 32, 0.88);
+  border-radius: 16px;
+  padding: 25px;
+  text-align: center;
+  position: relative;
+  width: 250px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.top-player-card:hover {
+  transform: translateY(-10px);
+}
+
+.rank-badge {
+  font-size: 3rem;
+  margin-bottom: 15px;
+  filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));
+}
+
+.player-name {
+  font-size: 1.5rem;
+  margin: 10px 0;
+  color: white;
+}
+
+.balance-stat {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #00d4ff;
+  margin-bottom: 5px;
+}
+
+.winrate-stat {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+/* 1st Place - Gold */
+.rank-1 {
+  border: 2px solid #ffd700;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+  height: 280px; /* Make 1st place taller */
+  z-index: 2;
+}
+.rank-1 .player-name {
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+}
+
+/* 2nd Place - Silver */
+.rank-2 {
+  border: 2px solid #c0c0c0;
+  box-shadow: 0 0 20px rgba(192, 192, 192, 0.2);
+  height: 250px;
+}
+.rank-2 .player-name {
+  color: #c0c0c0;
+}
+
+/* 3rd Place - Bronze */
+.rank-3 {
+  border: 2px solid #cd7f32;
+  box-shadow: 0 0 20px rgba(205, 127, 50, 0.2);
+  height: 230px;
+}
+.rank-3 .player-name {
+  color: #cd7f32;
+}
+
+
+/* Rest of leaderboard */
+.rest-leaderboard {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.leaderboard-row {
+  display: flex;
+  align-items: center;
+  background: rgba(15, 18, 32, 0.6);
+  border-radius: 12px;
+  padding: 15px 30px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.leaderboard-row:hover {
+  background: rgba(25, 30, 50, 0.8);
+  transform: scale(1.02);
+  border-color: rgba(0, 191, 255, 0.3);
+}
+
+.row-rank {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #666;
+  width: 60px;
+}
+
+.row-name {
+  flex-grow: 1;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.row-balance {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #00d4ff;
+}
+
+/* Loading & Error */
+.loading-spinner {
+  text-align: center;
+  font-size: 1.5rem;
+  color: #00bfff;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+.error-message {
+  text-align: center;
+  color: #ff4d4d;
+  background: rgba(255, 77, 77, 0.1);
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #ff4d4d;
+}
+
+@media (max-width: 800px) {
+  .top-three-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+  .rank-1, .rank-2, .rank-3 {
+    height: auto;
+    width: 100%;
+    max-width: 300px;
+  }
+  .leaderboard-row {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+  .row-rank {
+    width: auto;
+  }
+}
