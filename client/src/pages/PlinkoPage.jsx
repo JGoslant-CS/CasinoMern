@@ -99,7 +99,7 @@ function PlinkoPage({ user, setUser }) {
 
     // Update and draw balls
     const activeBalls = [];
-    const speed = 0.25;
+    const speed = 0.025;
 
     for (const ball of ballsRef.current) {
       ball.t += speed;
@@ -132,12 +132,20 @@ function PlinkoPage({ user, setUser }) {
       const p1 = ball.points[idx];
       const p2 = ball.points[idx+1];
       
-      const x = p1.x + (p2.x - p1.x) * frac;
+      const dx = p2.x - p1.x;
+      const dir = dx > 0 ? 1 : -1;
+      
+      // Add a physical bounce effect
+      // When frac is small, the ball bounces slightly back in the opposite direction
+      let x = p1.x + dx * frac;
       let y = p1.y + (p2.y - p1.y) * frac;
       
-      // Arc between pegs (except the first drop which is straight)
       if (idx > 0 && idx < maxT - 1) {
-          y -= Math.sin(frac * Math.PI) * 15;
+          x -= dir * Math.sin(frac * Math.PI) * 12;
+          y -= Math.sin(frac * Math.PI) * 22;
+      } else if (idx === 0) {
+          // First drop is straight down, just accelerate a bit
+          y = p1.y + (p2.y - p1.y) * Math.pow(frac, 1.5);
       }
       
       ctx.fillStyle = "magenta";
