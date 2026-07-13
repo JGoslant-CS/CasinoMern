@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/SlotsPage.css";
 
@@ -13,54 +13,6 @@ function SlotsPage({ user, setUser }) {
   const [reels, setReels] = useState(["🍒", "🍋", "🔔"]);
   const [message, setMessage] = useState("");
   const [spinning, setSpinning] = useState(false);
-
-  const placeBet = async () => {
-    const res = await fetch(`${API_URL}/api/game/bet`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId: user._id ||user.id,
-        betAmount,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      setMessage(data.message || "Could not place bet.");
-      return false;
-    }
-
-    setUser(data.user);
-    localStorage.setItem("user", JSON.stringify(data.user));
-    return true;
-  };
-
-  const saveGameResult = async (won, payout) => {
-    const res = await fetch(`${API_URL}/api/game/result`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId: user._id || user.id,
-        won,
-        payout,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      setMessage(data.message || "Could not save result.");
-      return;
-    }
-
-    setUser(data.user);
-    localStorage.setItem("user", JSON.stringify(data.user));
-  };
 
   const spin = async () => {
     if (!user) {
@@ -81,44 +33,54 @@ function SlotsPage({ user, setUser }) {
     setSpinning(true);
     setMessage("");
 
-    const betPlaced = await placeBet();
+    // Visually deduct bet at the start of spin
+    const intermediateUser = { ...user, balance: user.balance - betAmount };
+    setUser(intermediateUser);
 
-    if (!betPlaced) {
-      setSpinning(false);
-      return;
-    }
+    try {
+      const res = await fetch(`${API_URL}/api/game/slots`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: user._id || user.id,
+          betAmount,
+        }),
+      });
 
-    setTimeout(async () => {
-      const newReels = [
-        symbols[Math.floor(Math.random() * symbols.length)],
-        symbols[Math.floor(Math.random() * symbols.length)],
-        symbols[Math.floor(Math.random() * symbols.length)],
-      ];
+      const data = await res.json();
 
-      setReels(newReels);
-
-      let payout = 0;
-      let won = false;
-
-      if (newReels[0] === newReels[1] && newReels[1] === newReels[2]) {
-        payout = betAmount * 8;
-        won = true;
-        setMessage(`JACKPOT! You won ${payout} credits!`);
-      } else if (
-        newReels[0] === newReels[1] ||
-        newReels[1] === newReels[2] ||
-        newReels[0] === newReels[2]
-      ) {
-        payout = betAmount * 2;
-        won = true;
-        setMessage(`Nice! You won ${payout} credits!`);
-      } else {
-        setMessage(`You lost ${betAmount} credit${betAmount > 1 ? "s" : ""}.`);
+      if (!res.ok) {
+        setMessage(data.message || "Could not spin slots.");
+        // Revert balance visual deduction if error
+        setUser(user);
+        setSpinning(false);
+        return;
       }
 
-      await saveGameResult(won, payout);
+      setTimeout(() => {
+        setReels(data.reels);
+        setUser(data.user);
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        if (data.won) {
+          if (data.payout === betAmount * 8) {
+            setMessage(`JACKPOT! You won ${data.payout} credits!`);
+          } else {
+            setMessage(`Nice! You won ${data.payout} credits!`);
+          }
+        } else {
+          setMessage(`You lost ${betAmount} credit${betAmount > 1 ? "s" : ""}.`);
+        }
+        setSpinning(false);
+      }, 800);
+    } catch {
+      setMessage("Could not connect to the server.");
+      // Revert balance visual deduction if error
+      setUser(user);
       setSpinning(false);
-    }, 800);
+    }
   };
 
   return (

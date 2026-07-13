@@ -239,6 +239,87 @@ router.post("/roulette", async (req, res) => {
   }
 });
 
+const slotSymbols = ["🍒", "🍋", "🔔", "💎", "7️⃣", "🍀"];
+
+router.post("/slots", async (req, res) => {
+  try {
+    const { userId, betAmount } = req.body;
+
+    const numericBet = Number(betAmount);
+
+    if (!userId) {
+      return res.status(400).json({ message: "Missing user ID." });
+    }
+
+    if (
+      !Number.isInteger(numericBet) ||
+      numericBet < 1 ||
+      numericBet > 10
+    ) {
+      return res.status(400).json({
+        message: "Bet must be a whole number between 1 and 10 credits.",
+      });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    if (user.balance < numericBet) {
+      return res.status(400).json({ message: "Not enough credits." });
+    }
+
+    // Roll reels on server-side
+    const reels = [
+      slotSymbols[Math.floor(Math.random() * slotSymbols.length)],
+      slotSymbols[Math.floor(Math.random() * slotSymbols.length)],
+      slotSymbols[Math.floor(Math.random() * slotSymbols.length)],
+    ];
+
+    let payout = 0;
+    let won = false;
+
+    if (reels[0] === reels[1] && reels[1] === reels[2]) {
+      payout = numericBet * 8;
+      won = true;
+    } else if (
+      reels[0] === reels[1] ||
+      reels[1] === reels[2] ||
+      reels[0] === reels[2]
+    ) {
+      payout = numericBet * 2;
+      won = true;
+    }
+
+    // Update user balance and stats
+    user.balance -= numericBet;
+    if (won) {
+      user.balance += payout;
+      user.totalWins += 1;
+      user.totalBalanceWon += payout;
+    } else {
+      user.totalLosses += 1;
+    }
+    user.totalGames += 1;
+
+    await user.save();
+
+    res.json({
+      message: won ? `You won ${payout} credits!` : `You lost ${numericBet} credits.`,
+      reels,
+      won,
+      payout,
+      balance: user.balance,
+      user,
+    });
+  } catch (error) {
+    console.error("Slots error:", error);
+    res.status(500).json({ message: "Server error while playing slots." });
+  }
+});
+
 // Leaderboard
 router.get("/leaderboard", async (req, res) => {
   try {
