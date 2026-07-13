@@ -6,10 +6,12 @@ import blackjackImg from "./assets/blackjack.png";
 import pokerImg from "./assets/poker.png";
 import slotImg from "./assets/slot.png";
 import cautionImg from "./assets/caution.png";
+import plinkoImg from "./assets/plinko.png";
 import SlotsPage from "./pages/SlotsPage";
 import RoulettePage from "./pages/RoulettePage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import BlackjackPage from "./pages/BlackjackPage";
+import PlinkoPage from "./pages/PlinkoPage";
 
 const API_URL = "https://casinomern.onrender.com";
 
@@ -34,6 +36,9 @@ function App() {
         break;
       case "/blackjack":
         document.title = "Casino MERN - Blackjack";
+        break;
+      case "/plinko":
+        document.title = "Casino MERN - Plinko";
         break;
       default:
         document.title = "Casino MERN";
@@ -96,6 +101,17 @@ function App() {
     }
 
     navigate("/roulette");
+  }; 
+
+  const handlePlinkoPlay = () => {
+    if (!user) {
+        setMessage("Please login or register before playing.");
+        setIsRegister(false);
+        setShowLogin(true);
+        return;
+    }
+
+    navigate("/plinko");
   }; 
 
   const handleSecretBonus = async () => {
@@ -293,6 +309,15 @@ function App() {
           />
 
           <GameCard
+            image={plinkoImg}
+            icon="⚪"
+            title="PLINKO"
+            desc="Drop the ball and watch it bounce for massive multipliers."
+            button="PLAY PLINKO"
+            onPlay={handlePlinkoPlay}
+          />
+
+          <GameCard
             image={cautionImg}
             icon="🚧"
             title="COMING SOON..."
@@ -402,6 +427,7 @@ function App() {
         <Route path="/roulette" element={<RoulettePage user={user} setUser={setUser} />} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
         <Route path="/blackjack" element={<BlackjackPage user={user} setUser={setUser} />} />
+        <Route path="/plinko" element={<PlinkoPage user={user} setUser={setUser} />} />
       </Routes>
     </>
   );

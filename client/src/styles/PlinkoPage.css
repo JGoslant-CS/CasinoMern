@@ -1,0 +1,176 @@
+.plinko-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.plinko-game-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: radial-gradient(circle at top center, #1a0b2e 0%, #05020a 100%);
+  padding: 20px;
+  border-top: 2px solid rgba(138, 43, 226, 0.3);
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.8);
+  position: relative;
+  overflow: hidden;
+}
+
+.plinko-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.plinko-header h2 {
+  font-size: 2.5rem;
+  color: #e040fb;
+  text-shadow: 0 0 10px rgba(224, 64, 251, 0.5);
+  margin-bottom: 10px;
+}
+
+.plinko-canvas-container {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+canvas {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  border: 1px solid rgba(138, 43, 226, 0.3);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5), inset 0 0 30px rgba(0,0,0,0.8);
+  max-width: 100%;
+  height: auto;
+}
+
+.difficulty-selector {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.diff-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 8px 25px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+.diff-btn.active.low {
+  background: linear-gradient(135deg, #2e7d32, #66bb6a);
+  border-color: #66bb6a;
+  box-shadow: 0 0 15px rgba(102, 187, 106, 0.4);
+}
+
+.diff-btn.active.medium {
+  background: linear-gradient(135deg, #f57f17, #fbc02d);
+  border-color: #fbc02d;
+  box-shadow: 0 0 15px rgba(251, 192, 45, 0.4);
+}
+
+.diff-btn.active.high {
+  background: linear-gradient(135deg, #c62828, #ef5350);
+  border-color: #ef5350;
+  box-shadow: 0 0 15px rgba(239, 83, 80, 0.4);
+}
+
+.drop-btn {
+  background: linear-gradient(135deg, #8e24aa, #e040fb);
+  color: white;
+  border: 2px solid #e040fb;
+  padding: 15px 60px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border-radius: 30px;
+  cursor: pointer;
+  margin-top: 10px;
+  box-shadow: 0 10px 25px rgba(224, 64, 251, 0.3);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.drop-btn:hover:not(:disabled) {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 15px 35px rgba(224, 64, 251, 0.6);
+  background: linear-gradient(135deg, #ab47bc, #ea80fc);
+}
+
+.drop-btn:active:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.drop-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  filter: grayscale(80%);
+}
+
+.plinko-bet-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+  max-width: 850px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 20px;
+}
+
+.plinko-bet-controls .bet-adjust-btn {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border: 2px solid #e040fb;
+  color: #e040fb;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(224, 64, 251, 0.15);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 58px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.plinko-bet-controls .bet-adjust-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e040fb 0%, #d500f9 100%);
+  color: #ffffff;
+  border-color: #ffffff;
+  box-shadow: 0 0 20px rgba(224, 64, 251, 0.6);
+  transform: translateY(-3px);
+}
+
+.plinko-bet-controls .bet-adjust-btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+  border-color: #475569;
+  color: #64748b;
+  background: #1e293b;
+  box-shadow: none;
+}
+
+.plinko-bet-display {
+  font-size: 1.5rem;
+  font-weight: bold;
+  min-width: 120px;
+  text-align: center;
+  color: #e040fb;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 1px inset rgba(255, 255, 255, 0.1);
+}

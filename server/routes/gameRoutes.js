@@ -341,6 +341,68 @@ router.get("/leaderboard", async (req, res) => {
   }
 });
 
+// Plinko
+const plinkoMultipliers = {
+  high: [100, 25, 10, 5, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 5, 10, 25, 100],
+  medium: [20, 10, 5, 3, 1.5, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 1, 1.5, 3, 5, 10, 20],
+  low: [10, 5, 2, 1.5, 1.2, 1, 0.8, 0.5, 0.5, 0.5, 0.8, 1, 1.2, 1.5, 2, 5, 10],
+};
+
+router.post("/plinko/drop", async (req, res) => {
+  try {
+    const { userId, betAmount, difficulty } = req.body;
+    const numericBet = Number(betAmount);
+
+    if (!userId) return res.status(400).json({ message: "Missing user ID." });
+    if (!Number.isInteger(numericBet) || numericBet < 1 || numericBet > 100) {
+      return res.status(400).json({ message: "Bet must be between 1 and 100." });
+    }
+    
+    const diff = difficulty?.toLowerCase() || "medium";
+    if (!plinkoMultipliers[diff]) {
+      return res.status(400).json({ message: "Invalid difficulty." });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found." });
+    if (user.balance < numericBet) return res.status(400).json({ message: "Not enough credits." });
+
+    // Calculate final bucket using 16 coin flips
+    let bucketIndex = 0;
+    for (let i = 0; i < 16; i++) {
+      if (Math.random() > 0.5) bucketIndex++;
+    }
+
+    const multiplier = plinkoMultipliers[diff][bucketIndex];
+    const payout = Math.floor(numericBet * multiplier);
+
+    user.balance -= numericBet;
+    if (payout > 0) {
+      user.balance += payout;
+      if (payout > numericBet) {
+        user.totalWins += 1;
+        user.totalBalanceWon += payout;
+      }
+    } else {
+      user.totalLosses += 1;
+    }
+    user.totalGames += 1;
+
+    await user.save();
+
+    res.json({
+      bucketIndex,
+      payout,
+      multiplier,
+      balance: user.balance,
+      user
+    });
+  } catch (error) {
+    console.error("Plinko error:", error);
+    res.status(500).json({ message: "Server error while playing plinko." });
+  }
+});
+
 // Blackjack
 router.post("/blackjack/start", startGame);
 router.post("/blackjack/hit", hit);
