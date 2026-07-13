@@ -5,9 +5,9 @@ import "../styles/PlinkoPage.css";
 const API_URL = "https://casinomern.onrender.com";
 
 const multipliers = {
-  high: [100, 25, 10, 5, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 5, 10, 25, 100],
-  medium: [20, 10, 5, 3, 1.5, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 1, 1.5, 3, 5, 10, 20],
-  low: [10, 5, 2, 1.5, 1.2, 1, 0.8, 0.5, 0.5, 0.5, 0.8, 1, 1.2, 1.5, 2, 5, 10],
+  high: [1000, 150, 50, 10, 3, 1.0, 0.4, 0.3, 0.2, 0.3, 0.4, 1.0, 3, 10, 50, 150, 1000],
+  medium: [80, 25, 10, 5, 2.5, 1.3, 0.9, 0.7, 0.4, 0.7, 0.9, 1.3, 2.5, 5, 10, 25, 80],
+  low: [12, 5, 3, 2, 1.6, 1.2, 1.0, 0.9, 0.7, 0.9, 1.0, 1.2, 1.6, 2, 3, 5, 12],
 };
 
 function PlinkoPage({ user, setUser }) {
@@ -257,8 +257,35 @@ function PlinkoPage({ user, setUser }) {
           <p style={{ color: "#fff" }}>{message}</p>
         </div>
 
-        <div className="plinko-canvas-container">
-          <canvas ref={canvasRef} width={800} height={600}></canvas>
+        <div className="plinko-main-container">
+          <div className="plinko-canvas-container">
+            <canvas ref={canvasRef} width={800} height={600}></canvas>
+          </div>
+
+          <div className="plinko-sidebar">
+            <h3>ODDS & PAYOUTS</h3>
+            <div className="prob-list">
+              {[
+                { label: "Edges (0, 16)", mult: `${multipliers[difficulty][0]}x`, prob: "0.0015%" },
+                { label: "Inner Edges (1, 15)", mult: `${multipliers[difficulty][1]}x`, prob: "0.024%" },
+                { label: "Mid-Outer (2, 14)", mult: `${multipliers[difficulty][2]}x`, prob: "0.18%" },
+                { label: "Mid (3, 13)", mult: `${multipliers[difficulty][3]}x`, prob: "0.85%" },
+                { label: "Mid-Inner (4, 12)", mult: `${multipliers[difficulty][4]}x`, prob: "2.78%" },
+                { label: "Center-Outer (5, 11)", mult: `${multipliers[difficulty][5]}x`, prob: "6.67%" },
+                { label: "Center-Mid (6, 10)", mult: `${multipliers[difficulty][6]}x`, prob: "12.22%" },
+                { label: "Center-Inner (7, 9)", mult: `${multipliers[difficulty][7]}x`, prob: "17.46%" },
+                { label: "Center (8)", mult: `${multipliers[difficulty][8]}x`, prob: "19.64%" }
+              ].map((item, idx) => (
+                <div className="prob-item" key={idx}>
+                  <div className="prob-info">
+                    <span className="prob-label">{item.label}</span>
+                    <span className="prob-mult">{item.mult}</span>
+                  </div>
+                  <span className="prob-percent">{item.prob}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="difficulty-selector">
