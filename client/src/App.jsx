@@ -1,5 +1,5 @@
-﻿import { useRef, useState } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import "./App.css";
 import rouletteImg from "./assets/roulette.png";
 import blackjackImg from "./assets/blackjack.png";
@@ -13,7 +13,24 @@ const API_URL = "https://casinomern.onrender.com";
 
 function App() {
   const navigate = useNavigate();
+  const location = useLocation();
   const gamesRef = useRef(null);
+
+  useEffect(() => {
+    switch (location.pathname) {
+      case "/":
+        document.title = "Casino MERN - Play Slots, Roulette & More";
+        break;
+      case "/slots":
+        document.title = "Casino MERN - Slot Machine";
+        break;
+      case "/roulette":
+        document.title = "Casino MERN - European Roulette";
+        break;
+      default:
+        document.title = "Casino MERN";
+    }
+  }, [location.pathname]);
   const [showLogin, setShowLogin] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
