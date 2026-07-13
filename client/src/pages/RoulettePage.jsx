@@ -79,9 +79,9 @@ function RoulettePage({ user, setUser }) {
     if (
       !Number.isInteger(numericBet) ||
       numericBet < 1 ||
-      numericBet > 10
+      numericBet > 100
     ) {
-      setMessage("Bet must be a whole number between 1 and 10.");
+      setMessage("Bet must be a whole number between 1 and 100.");
       return;
     }
 
@@ -316,7 +316,7 @@ function RoulettePage({ user, setUser }) {
               className="roulette-bet-input"
               type="number"
               min="1"
-              max="10"
+              max="100"
               step="1"
               value={betAmount}
               disabled={isSpinning}
@@ -326,7 +326,7 @@ function RoulettePage({ user, setUser }) {
             />
 
             <p className="roulette-limit">
-              Minimum 1 credit · Maximum 10 credits
+              Minimum 1 credit · Maximum 100 credits
             </p>
 
             <div className="roulette-bet-types">

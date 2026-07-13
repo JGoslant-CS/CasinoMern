@@ -20,8 +20,8 @@ function SlotsPage({ user, setUser }) {
       return;
     }
 
-    if (betAmount < 1 || betAmount > 10) {
-      setMessage("Bet must be between 1 and 10 credits.");
+    if (betAmount < 1 || betAmount > 100) {
+      setMessage("Bet must be between 1 and 100 credits.");
       return;
     }
 
@@ -115,15 +115,15 @@ function SlotsPage({ user, setUser }) {
           <div className="bet-display">Bet: {betAmount}</div>
 
           <button
-            onClick={() => setBetAmount((prev) => Math.min(10, prev + 1))}
+            onClick={() => setBetAmount((prev) => Math.min(100, prev + 1))}
             disabled={spinning}
           >
             +
           </button>
         </div>
 
-        <button className="max-bet-btn" onClick={() => setBetAmount(10)} disabled={spinning}>
-          Max Bet 10
+        <button className="max-bet-btn" onClick={() => setBetAmount(100)} disabled={spinning}>
+          Max Bet 100
         </button>
 
         <button className="spin-btn" onClick={spin} disabled={spinning}>

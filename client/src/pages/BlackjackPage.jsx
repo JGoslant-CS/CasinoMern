@@ -103,8 +103,8 @@ function BlackjackPage({ user, setUser }) {
       return;
     }
 
-    if (betAmount < 1) {
-      setMessage("Bet must be at least 1 credit.");
+    if (betAmount < 1 || betAmount > 100) {
+      setMessage("Bet must be between 1 and 100 credits.");
       return;
     }
 
@@ -387,6 +387,16 @@ function BlackjackPage({ user, setUser }) {
           <div className="bet-controls">
             <button 
               className="bet-adjust-btn"
+              onClick={() => setBetAmount(Math.max(1, betAmount - 50))}
+              disabled={status === "active" || loading}
+            >-50</button>
+            <button 
+              className="bet-adjust-btn"
+              onClick={() => setBetAmount(Math.max(1, betAmount - 25))}
+              disabled={status === "active" || loading}
+            >-25</button>
+            <button 
+              className="bet-adjust-btn"
               onClick={() => setBetAmount(Math.max(1, betAmount - 10))}
               disabled={status === "active" || loading}
             >-10</button>
@@ -394,18 +404,28 @@ function BlackjackPage({ user, setUser }) {
               className="bet-adjust-btn"
               onClick={() => setBetAmount(Math.max(1, betAmount - 1))}
               disabled={status === "active" || loading}
-            >-</button>
+            >-1</button>
             <div className="bet-display">Bet: {betAmount}</div>
             <button 
               className="bet-adjust-btn"
-              onClick={() => setBetAmount(betAmount + 1)}
+              onClick={() => setBetAmount(Math.min(100, betAmount + 1))}
               disabled={status === "active" || loading}
-            >+</button>
+            >+1</button>
             <button 
               className="bet-adjust-btn"
-              onClick={() => setBetAmount(betAmount + 10)}
+              onClick={() => setBetAmount(Math.min(100, betAmount + 10))}
               disabled={status === "active" || loading}
             >+10</button>
+            <button 
+              className="bet-adjust-btn"
+              onClick={() => setBetAmount(Math.min(100, betAmount + 25))}
+              disabled={status === "active" || loading}
+            >+25</button>
+            <button 
+              className="bet-adjust-btn"
+              onClick={() => setBetAmount(Math.min(100, betAmount + 50))}
+              disabled={status === "active" || loading}
+            >+50</button>
           </div>
 
           <div className="action-controls">

@@ -55,8 +55,8 @@ export const startGame = async (req, res) => {
   try {
     const { userId, betAmount } = req.body;
 
-    if (!userId || !betAmount || betAmount < 1) {
-      return res.status(400).json({ message: "Invalid bet amount." });
+    if (!userId || !betAmount || betAmount < 1 || betAmount > 100) {
+      return res.status(400).json({ message: "Bet must be between 1 and 100 credits." });
     }
 
     const user = await User.findById(userId);

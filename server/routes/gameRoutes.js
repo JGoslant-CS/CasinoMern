@@ -13,8 +13,8 @@ router.post("/bet", async (req, res) => {
       return res.status(400).json({ message: "Missing userId or betAmount." });
     }
 
-    if (betAmount < 1 || betAmount > 10) {
-      return res.status(400).json({ message: "Bet must be between 1 and 10 credits." });
+    if (betAmount < 1 || betAmount > 100) {
+      return res.status(400).json({ message: "Bet must be between 1 and 100 credits." });
     }
 
     const user = await User.findById(userId);
@@ -141,10 +141,10 @@ router.post("/roulette", async (req, res) => {
     if (
       !Number.isInteger(numericBet) ||
       numericBet < 1 ||
-      numericBet > 10
+      numericBet > 100
     ) {
       return res.status(400).json({
-        message: "Bet must be a whole number between 1 and 10 credits.",
+        message: "Bet must be a whole number between 1 and 100 credits.",
       });
     }
 
@@ -261,10 +261,10 @@ router.post("/slots", async (req, res) => {
     if (
       !Number.isInteger(numericBet) ||
       numericBet < 1 ||
-      numericBet > 10
+      numericBet > 100
     ) {
       return res.status(400).json({
-        message: "Bet must be a whole number between 1 and 10 credits.",
+        message: "Bet must be a whole number between 1 and 100 credits.",
       });
     }
 
