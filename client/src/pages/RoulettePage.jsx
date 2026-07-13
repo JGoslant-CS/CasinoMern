@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/RoulettePage.css";
 
@@ -30,13 +30,8 @@ function normalizeAngle(angle) {
   return ((angle % 360) + 360) % 360;
 }
 
-function RoulettePage() {
+function RoulettePage({ user, setUser }) {
   const navigate = useNavigate();
-
-  const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem("user");
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
 
   const [betAmount, setBetAmount] = useState(1);
   const [betType, setBetType] = useState("red");
