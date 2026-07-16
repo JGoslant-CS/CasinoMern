@@ -71,6 +71,17 @@ function App() {
     alert("Game coming soon!");
   };
 
+  const handleTexasHoldemPlay = () => {
+    if (!user) {
+      setMessage("Please login or register before playing.");
+      setIsRegister(false);
+      setShowLogin(true);
+      return;
+    }
+
+    navigate("/texas-holdem");
+  };
+
   const handleBlackjackPlay = () => {
     if (!user) {
       setMessage("Please login or register before playing.");
@@ -297,7 +308,7 @@ function App() {
             title="TEXAS HOLD&apos;EM"
             desc="Bluff, bet, and win big."
             button="PLAY TEXAS HOLD&apos;EM"
-            onPlay={handlePlay}
+            onPlay={handleTexasHoldemPlay}
           />
 
           <GameCard
