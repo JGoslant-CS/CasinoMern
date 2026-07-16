@@ -12,6 +12,7 @@ import RoulettePage from "./pages/RoulettePage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import BlackjackPage from "./pages/BlackjackPage";
 import PlinkoPage from "./pages/PlinkoPage";
+import TexasHoldemPage from "./pages/TexasHoldemPage";
 
 const API_URL = "https://casinomern.onrender.com";
 
@@ -428,6 +429,7 @@ function App() {
         <Route path="/leaderboard" element={<LeaderboardPage />} />
         <Route path="/blackjack" element={<BlackjackPage user={user} setUser={setUser} />} />
         <Route path="/plinko" element={<PlinkoPage user={user} setUser={setUser} />} />
+        <Route path="/texas-holdem" element={<TexasHoldemPage user={user} setUser={setUser} />} />
       </Routes>
     </>
   );

@@ -403,6 +403,62 @@ router.post("/plinko/drop", async (req, res) => {
   }
 });
 
+// Texas Hold'em game result
+router.post("/texas-holdem/result", async (req, res) => {
+  try {
+    const { userId, result, payout = 0 } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        message: "Missing userId.",
+      });
+    }
+
+    if (!["win", "loss", "push"].includes(result)) {
+      return res.status(400).json({
+        message: "Invalid game result.",
+      });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found.",
+      });
+    }
+
+    if (result === "win") {
+      user.balance += payout;
+      user.totalWins += 1;
+      user.totalBalanceWon += payout;
+    } else if (result === "loss") {
+      user.totalLosses += 1;
+    } else if (result === "push") {
+      // Return player's contribution
+      user.balance += payout;
+    }
+
+    user.totalGames += 1;
+
+    await user.save();
+
+    res.json({
+      message: "Texas Hold'em result saved.",
+      result,
+      payout,
+      balance: user.balance,
+      user,
+    });
+  } catch (error) {
+    console.error("Texas Hold'em result error:", error);
+
+    res.status(500).json({
+      message: "Server error saving Texas Hold'em result.",
+    });
+  }
+});
+
 // Blackjack
 router.post("/blackjack/start", startGame);
 router.post("/blackjack/hit", hit);
