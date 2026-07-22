@@ -46,6 +46,7 @@ function App() {
         document.title = "Casino MERN";
     }
   }, [location.pathname]);
+
   const [showLogin, setShowLogin] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
@@ -68,7 +69,6 @@ function App() {
       setShowLogin(true);
       return;
     }
-
     alert("Game coming soon!");
   };
 
@@ -79,7 +79,6 @@ function App() {
       setShowLogin(true);
       return;
     }
-
     navigate("/texas-holdem");
   };
 
@@ -90,7 +89,6 @@ function App() {
       setShowLogin(true);
       return;
     }
-
     navigate("/blackjack");
   };
 
@@ -101,31 +99,28 @@ function App() {
       setShowLogin(true);
       return;
     }
-
     navigate("/slots");
   };
 
   const handleRoulettePlay = () => {
     if (!user) {
-        setMessage("Please login or register before playing.");
-        setIsRegister(false);
-        setShowLogin(true);
-        return;
+      setMessage("Please login or register before playing.");
+      setIsRegister(false);
+      setShowLogin(true);
+      return;
     }
-
     navigate("/roulette");
-  }; 
+  };
 
   const handlePlinkoPlay = () => {
     if (!user) {
-        setMessage("Please login or register before playing.");
-        setIsRegister(false);
-        setShowLogin(true);
-        return;
+      setMessage("Please login or register before playing.");
+      setIsRegister(false);
+      setShowLogin(true);
+      return;
     }
-
     navigate("/plinko");
-  }; 
+  };
 
   const handleSecretBonus = async () => {
     if (!user) {
@@ -138,12 +133,8 @@ function App() {
     try {
       const res = await fetch(`${API_URL}/api/game/bonus`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: user._id || user.id,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user._id || user.id }),
       });
 
       const data = await res.json();
@@ -153,14 +144,9 @@ function App() {
         return;
       }
 
-      const updatedUser = {
-        ...user,
-        balance: data.balance ?? data.credits,
-      };
-
+      const updatedUser = { ...user, balance: data.balance ?? data.credits };
       setUser(updatedUser);
       localStorage.setItem("user", JSON.stringify(updatedUser));
-
       alert(data.message || "Secret bonus found! +10 credits");
     } catch {
       alert("Could not connect to the server.");
@@ -177,22 +163,13 @@ function App() {
     const endpoint = isRegister ? "/api/auth/register" : "/api/auth/login";
 
     const body = isRegister
-      ? {
-          username: form.username,
-          email: form.email,
-          password: form.password,
-        }
-      : {
-          email: form.email,
-          password: form.password,
-        };
+      ? { username: form.username, email: form.email, password: form.password }
+      : { email: form.email, password: form.password };
 
     try {
       const res = await fetch(`${API_URL}${endpoint}`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
 
@@ -226,12 +203,10 @@ function App() {
       <nav className="navbar">
         <div className="logo">
           <span className="logo-icon">♠</span>
-
           <div>
             <h2>CASINO</h2>
             <p>MERN</p>
           </div>
-
           <span
             className="logo-icon"
             onClick={handleSecretBonus}
@@ -240,16 +215,14 @@ function App() {
             tabIndex={0}
             style={{ cursor: "pointer" }}
             onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                handleSecretBonus();
-              }
+              if (e.key === "Enter" || e.key === " ") handleSecretBonus();
             }}
           >
             ♠
           </span>
         </div>
 
-        <div className="nav-actions" style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+        <div className="nav-actions" style={{ display: "flex", gap: "15px", alignItems: "center" }}>
           <button className="leaderboard-btn" onClick={() => navigate("/leaderboard")}>
             🏆 Leaderboard
           </button>
@@ -268,77 +241,21 @@ function App() {
 
       <section className="hero-section">
         <div className="hero-content">
-          <h1>
-            PLAY YOUR <span>FAVORITE GAMES</span>
-          </h1>
-          <p>
-            Roulette, Blackjack, and Texas Hold&apos;em. Real games. Real
-            excitement.
-          </p>
-          <button className="play-btn" onClick={scrollToGames}>
-            PLAY NOW ❯
-          </button>
+          <h1>PLAY YOUR <span>FAVORITE GAMES</span></h1>
+          <p>Roulette, Blackjack, and Texas Hold&apos;em. Real games. Real excitement.</p>
+          <button className="play-btn" onClick={scrollToGames}>PLAY NOW ❯</button>
         </div>
       </section>
 
       <section className="games-section" ref={gamesRef}>
         <h2>CHOOSE YOUR GAME</h2>
-
         <div className="game-grid">
-          <GameCard
-            image={rouletteImg}
-            icon="◎"
-            title="ROULETTE"
-            desc="Spin the wheel and test your luck."
-            button="PLAY ROULETTE"
-            onPlay={handleRoulettePlay}
-          />
-
-          <GameCard
-            image={blackjackImg}
-            icon="🃏"
-            title="BLACKJACK"
-            desc="Beat the dealer by getting as close to 21 as you can."
-            button="PLAY BLACKJACK"
-            onPlay={handleBlackjackPlay}
-          />
-
-          <GameCard
-            image={pokerImg}
-            icon="♠"
-            title="TEXAS HOLD&apos;EM"
-            desc="Bluff, bet, and win big."
-            button="PLAY TEXAS HOLD&apos;EM"
-            onPlay={handleTexasHoldemPlay}
-          />
-
-          <GameCard
-            image={slotImg}
-            icon="🎰"
-            title="SLOT MACHINE"
-            desc="Spin the reels and chase the jackpot."
-            button="PLAY SLOTS"
-            onPlay={handleSlotsPlay}
-          />
-
-          <GameCard
-            image={plinkoImg}
-            icon="⚪"
-            title="PLINKO"
-            desc="Drop the ball and watch it bounce for massive multipliers."
-            button="PLAY PLINKO"
-            onPlay={handlePlinkoPlay}
-          />
-
-          <GameCard
-            image={cautionImg}
-            icon="🚧"
-            title="COMING SOON..."
-            desc="More casino games are being added soon."
-            button="COMING SOON"
-            onPlay={handlePlay}
-            comingSoon={true}
-          />
+          <GameCard image={rouletteImg} icon="◎" title="ROULETTE" desc="Spin the wheel and test your luck." button="PLAY ROULETTE" onPlay={handleRoulettePlay} />
+          <GameCard image={blackjackImg} icon="🃏" title="BLACKJACK" desc="Beat the dealer by getting as close to 21 as you can." button="PLAY BLACKJACK" onPlay={handleBlackjackPlay} />
+          <GameCard image={pokerImg} icon="♠" title="TEXAS HOLD&apos;EM" desc="Bluff, bet, and win big." button="PLAY TEXAS HOLD&apos;EM" onPlay={handleTexasHoldemPlay} />
+          <GameCard image={slotImg} icon="🎰" title="SLOT MACHINE" desc="Spin the reels and chase the jackpot." button="PLAY SLOTS" onPlay={handleSlotsPlay} />
+          <GameCard image={plinkoImg} icon="⚪" title="PLINKO" desc="Drop the ball and watch it bounce for massive multipliers." button="PLAY PLINKO" onPlay={handlePlinkoPlay} />
+          <GameCard image={cautionImg} icon="🚧" title="COMING SOON..." desc="More casino games are being added soon." button="COMING SOON" onPlay={handlePlay} comingSoon={true} />
         </div>
       </section>
 
@@ -347,27 +264,18 @@ function App() {
       {showLogin && (
         <div className="modal-overlay">
           <div className="login-modal">
-            <button className="close-btn" onClick={() => setShowLogin(false)}>
-              ×
-            </button>
+            <button className="close-btn" onClick={() => setShowLogin(false)}>×</button>
 
             <div className="tabs">
               <button
                 className={!isRegister ? "active" : ""}
-                onClick={() => {
-                  setIsRegister(false);
-                  setMessage("");
-                }}
+                onClick={() => { setIsRegister(false); setMessage(""); }}
               >
                 Login
               </button>
-
               <button
                 className={isRegister ? "active" : ""}
-                onClick={() => {
-                  setIsRegister(true);
-                  setMessage("");
-                }}
+                onClick={() => { setIsRegister(true); setMessage(""); }}
               >
                 Register
               </button>
@@ -404,6 +312,30 @@ function App() {
             <button className="modal-submit" onClick={handleAuth}>
               {isRegister ? "Create Account" : "Login"}
             </button>
+
+            <div style={{ textAlign: "center", margin: "10px 0", color: "#888" }}>or</div>
+
+            <button
+              className="modal-submit"
+              onClick={() => window.location.href = `${API_URL}/api/auth/google`}
+              style={{
+                backgroundColor: "#fff",
+                color: "#333",
+                border: "1px solid #ddd",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px"
+              }}
+            >
+              <img
+                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                width="20"
+                height="20"
+                alt="Google"
+              />
+              Continue with Google
+            </button>
           </div>
         </div>
       )}
@@ -411,14 +343,10 @@ function App() {
       {showLogout && (
         <div className="modal-overlay">
           <div className="login-modal">
-            <button className="close-btn" onClick={() => setShowLogout(false)}>
-              ×
-            </button>
+            <button className="close-btn" onClick={() => setShowLogout(false)}>×</button>
             <h2>Logout?</h2>
             <p className="switch-text">Do you want to log out of your account?</p>
-            <button className="modal-submit" onClick={handleLogout}>
-              Logout
-            </button>
+            <button className="modal-submit" onClick={handleLogout}>Logout</button>
           </div>
         </div>
       )}
@@ -457,7 +385,6 @@ function GameCard({ image, icon, title, desc, button, onPlay, comingSoon }) {
           <span>{icon}</span>
         </div>
       </div>
-
       <div className="card-content">
         <h3>{title}</h3>
         <p>{desc}</p>

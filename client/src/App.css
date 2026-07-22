@@ -253,6 +253,8 @@ footer {
 
 .login-modal {
     width: min(430px, 92vw);
+    max-height: 90vh;
+    overflow-y: auto;
     position: relative;
     padding: 34px;
     border-radius: 18px;
