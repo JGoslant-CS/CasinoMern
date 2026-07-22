@@ -1,7 +1,10 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import passport from "passport";
-import { registerUser, loginUser } from "../controllers/authController.js";
+import {
+  registerUser,
+  loginUser,
+} from "../controllers/authController.js";
 import "../config/passport.js";
 import User from "../models/User.js";
 
@@ -13,32 +16,72 @@ router.post("/register", registerUser);
 // Login an existing user
 router.post("/login", loginUser);
 
-// Google OAuth routes
-router.get("/google", passport.authenticate("google", { scope: ["profile", "email"], session: false }));
+// Start Google OAuth login
+router.get(
+  "/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+    session: false,
+  })
+);
 
-router.get("/google/callback",
-  passport.authenticate("google", { failureRedirect: "/login", session: false }),
+// Google OAuth callback
+router.get(
+  "/google/callback",
+  passport.authenticate("google", {
+    failureRedirect: `${process.env.CLIENT_URL}/`,
+    session: false,
+  }),
   async (req, res) => {
     try {
+      if (!req.user) {
+        return res.redirect(
+          `${process.env.CLIENT_URL}/?error=google-auth-failed`
+        );
+      }
+
       const token = jwt.sign(
         { userId: req.user._id },
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
       );
-      res.redirect(`${process.env.CLIENT_URL}/auth/google/success?token=${token}&userId=${req.user._id}`);
+
+      const redirectUrl =
+        `${process.env.CLIENT_URL}/auth/google/success` +
+        `?token=${encodeURIComponent(token)}` +
+        `&userId=${encodeURIComponent(req.user._id.toString())}` +
+        `&username=${encodeURIComponent(req.user.username)}` +
+        `&balance=${encodeURIComponent(req.user.balance)}`;
+
+      return res.redirect(redirectUrl);
     } catch (error) {
-      res.redirect("/login");
+      console.error("Google OAuth callback error:", error);
+
+      return res.redirect(
+        `${process.env.CLIENT_URL}/?error=google-auth-failed`
+      );
     }
   }
 );
 
+// Get user information
 router.get("/user/:id", async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select("-passwordHash");
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.json({ user });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    return res.json({ user });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    console.error("Get user error:", error);
+
+    return res.status(500).json({
+      message: "Server error",
+    });
   }
 });
 
