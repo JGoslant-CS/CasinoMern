@@ -364,7 +364,7 @@ function App() {
       </div>
       <Routes>
         <Route path="/" element={HomePage} />
-        <Route path="/auth/google/success" element={<GoogleAuthSuccess />} />
+        <Route path="/auth/google/success" element={<GoogleAuthSuccess setUser={setUser} />} />
         <Route path="/slots" element={<SlotsPage user={user} setUser={setUser} />} />
         <Route path="/roulette" element={<RoulettePage user={user} setUser={setUser} />} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
