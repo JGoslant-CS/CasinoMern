@@ -5,6 +5,8 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import authRoutes from "./routes/authRoutes.js";
 import gameRoutes from "./routes/gameRoutes.js";
+import passport from "passport";
+import "./config/passport.js";
 
 dotenv.config();
 
@@ -24,6 +26,8 @@ app.use(
 );
 
 app.use(express.json());
+
+app.use(passport.initialize());
 
 // Test Route
 app.get("/", (req, res) => {

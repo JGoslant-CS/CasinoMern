@@ -1,5 +1,8 @@
 import express from "express";
+import jwt from "jsonwebtoken";
+import passport from "passport";
 import { registerUser, loginUser } from "../controllers/authController.js";
+import "../config/passport.js";
 
 const router = express.Router();
 
@@ -8,5 +11,24 @@ router.post("/register", registerUser);
 
 // Login an existing user
 router.post("/login", loginUser);
+
+// Google OAuth routes
+router.get("/google", passport.authenticate("google", { scope: ["profile", "email"], session: false }));
+
+router.get("/google/callback",
+  passport.authenticate("google", { failureRedirect: "/login", session: false }),
+  async (req, res) => {
+    try {
+      const token = jwt.sign(
+        { userId: req.user._id },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+      res.redirect(`${process.env.CLIENT_URL}/auth/google/success?token=${token}&userId=${req.user._id}`);
+    } catch (error) {
+      res.redirect("/login");
+    }
+  }
+);
 
 export default router;
