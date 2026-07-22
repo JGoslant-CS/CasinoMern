@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import passport from "passport";
 import { registerUser, loginUser } from "../controllers/authController.js";
 import "../config/passport.js";
+import User from "../models/User.js";
 
 const router = express.Router();
 
@@ -30,5 +31,15 @@ router.get("/google/callback",
     }
   }
 );
+
+router.get("/user/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("-passwordHash");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json({ user });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 export default router;

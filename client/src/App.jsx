@@ -13,6 +13,7 @@ import LeaderboardPage from "./pages/LeaderboardPage";
 import BlackjackPage from "./pages/BlackjackPage";
 import PlinkoPage from "./pages/PlinkoPage";
 import TexasHoldemPage from "./pages/TexasHoldemPage";
+import GoogleAuthSuccess from "./pages/GoogleAuthSuccess";
 
 const API_URL = "https://casinomern.onrender.com";
 
@@ -435,6 +436,7 @@ function App() {
       </div>
       <Routes>
         <Route path="/" element={HomePage} />
+        <Route path="/auth/google/success" element={<GoogleAuthSuccess />} />
         <Route path="/slots" element={<SlotsPage user={user} setUser={setUser} />} />
         <Route path="/roulette" element={<RoulettePage user={user} setUser={setUser} />} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
