@@ -48,6 +48,7 @@ export const startGame = async (req, res) => {
     res.json({
       playerHand,
       dealerHand: [dealerHand[0], { suit: "Hidden", value: "Hidden" }],
+      realDealerHand: dealerHand,
       dealerVisibleCard: dealerHand[0],
       deck,
       playerTotal,
@@ -77,8 +78,11 @@ export const hitCard = async (req, res) => {
       status = "stand";
     }
 
+    const { dealerHand } = req.body;
+
     res.json({
       playerHand: updatedHand,
+       dealerHand,
       deck,
       playerTotal,
       status,

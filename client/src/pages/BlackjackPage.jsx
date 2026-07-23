@@ -50,6 +50,8 @@ function BlackjackPage({ user, setUser }) {
   const [splitHand, setSplitHand] = useState(null);
   const [activeHand, setActiveHand] = useState("playerHand");
   const [dealerHand, setDealerHand] = useState([]);
+  const [deck, setDeck] = useState([]);
+  const [realDealerHand, setRealDealerHand] = useState([]);
   const [status, setStatus] = useState("idle"); // idle, active, split_active, finished, player_won, dealer_won, push, blackjack
   const [message, setMessage] = useState("Place your bet and deal!");
   const [loading, setLoading] = useState(false);
@@ -78,10 +80,15 @@ function BlackjackPage({ user, setUser }) {
 
   const getStatusMessage = (newStatus, pValue, dValue, sValue) => {
     if (newStatus === "active") return "Hit, Stand, or Double?";
+    if (newStatus === "bust") return "Bust! You lose.";
     if (newStatus === "split_active") return `Playing ${activeHand === 'playerHand' ? 'Hand 1' : 'Hand 2'}...`;
     if (newStatus === "finished") return "Game Over - Check hands for results.";
     if (newStatus === "blackjack") return "BLACKJACK! You win 3:2 payout!";
     if (newStatus === "player_won") return "You win!";
+    if (newStatus === "win") return "You win!";
+    if (newStatus === "dealer_bust") return "Dealer busts! You win!";
+if (newStatus === "loss") return "Dealer wins.";
+if (newStatus === "tie") return "Push! Bet returned.";
     if (newStatus === "dealer_won") {
       if (pValue > 21) return "Bust! You lose.";
       return "Dealer wins.";
@@ -118,6 +125,7 @@ function BlackjackPage({ user, setUser }) {
     
     // Visually deduct bet at the start
     setUser({ ...user, balance: user.balance - betAmount });
+    localStorage.setItem("user", JSON.stringify({ ...user, balance: user.balance - betAmount }));
     setPlayerHand([]);
     setDealerHand([]);
     setSplitHand(null);
@@ -142,13 +150,14 @@ function BlackjackPage({ user, setUser }) {
       }
 
       setGameId(data.gameId);
+      setDeck(data.deck);
+      setRealDealerHand(data.realDealerHand);
       setPlayerHand(data.playerHand);
       setDealerHand(data.dealerHand);
       setSplitHand(data.splitHand || null);
       setActiveHand(data.activeHand || "playerHand");
       setStatus(data.status);
-      setUser(data.user);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      
       
       const pValue = calculateHandValue(data.playerHand);
       const dValue = calculateHandValue(data.dealerHand);
@@ -163,14 +172,15 @@ function BlackjackPage({ user, setUser }) {
   };
 
   const hit = async () => {
-    if (!gameId || (status !== "active" && status !== "split_active")) return;
+    if (status !== "active" && status !== "split_active") return;
     setLoading(true);
+    console.log("dealerHand before hit:", dealerHand);
 
     try {
       const res = await fetch(`${API_URL}/api/game/blackjack/hit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ gameId }),
+        body: JSON.stringify({ deck, playerHand, dealerHand }),
       });
 
       const data = await res.json();
@@ -181,6 +191,7 @@ function BlackjackPage({ user, setUser }) {
       }
 
       setPlayerHand(data.playerHand);
+      setDeck(data.deck);
       setDealerHand(data.dealerHand);
       setSplitHand(data.splitHand || null);
       setActiveHand(data.activeHand || "playerHand");
@@ -198,14 +209,14 @@ function BlackjackPage({ user, setUser }) {
   };
 
   const stand = async () => {
-    if (!gameId || (status !== "active" && status !== "split_active")) return;
+    if  (status !== "active" && status !== "split_active") return;
     setLoading(true);
 
     try {
       const res = await fetch(`${API_URL}/api/game/blackjack/stand`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ gameId }),
+        body: JSON.stringify({ deck, playerHand, dealerHand: realDealerHand }),
       });
 
       const data = await res.json();
@@ -220,6 +231,42 @@ function BlackjackPage({ user, setUser }) {
       setSplitHand(data.splitHand || null);
       setActiveHand(data.activeHand || "playerHand");
       setStatus(data.status);
+      if (data.status === "win" || data.status === "dealer_bust") {
+  const payout = betAmount * 2;
+  const resultRes = await fetch(`${API_URL}/api/game/result`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      userId: user._id || user.id,
+      won: true,
+      payout,
+    }),
+  });
+  const resultData = await resultRes.json();
+  if (resultData.user) {
+    setUser(resultData.user);
+    localStorage.setItem("user", JSON.stringify(resultData.user));
+  }
+} else if (data.status === "loss") {
+  const resultRes = await fetch(`${API_URL}/api/game/result`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      userId: user._id || user.id,
+      won: false,
+      payout: 0,
+    }),
+  });
+  const resultData = await resultRes.json();
+  if (resultData.user) {
+    setUser(resultData.user);
+    localStorage.setItem("user", JSON.stringify(resultData.user));
+  }
+} else if (data.status === "tie") {
+  const refundedUser = { ...user, balance: user.balance + betAmount };
+  setUser(refundedUser);
+  localStorage.setItem("user", JSON.stringify(refundedUser));
+}
       if (data.user) {
         setUser(data.user);
         localStorage.setItem("user", JSON.stringify(data.user));
