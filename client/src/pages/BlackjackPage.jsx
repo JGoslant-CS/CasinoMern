@@ -132,6 +132,24 @@ if (newStatus === "tie") return "Push! Bet returned.";
     setActiveHand("playerHand");
 
     try {
+      console.log("Attempting bet with userId:", user._id || user.id, "full user:", user);
+      const betRes = await fetch(`${API_URL}/api/game/bet`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    userId: user._id || user.id,
+    betAmount,
+  }),
+});
+
+const betData = await betRes.json();
+if (!betRes.ok) {
+  setMessage(betData.message || "Could not place bet.");
+  setUser(user);
+  localStorage.setItem("user", JSON.stringify(user));
+  setLoading(false);
+  return;
+}
       const res = await fetch(`${API_URL}/api/game/blackjack/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -157,6 +175,23 @@ if (newStatus === "tie") return "Push! Bet returned.";
       setSplitHand(data.splitHand || null);
       setActiveHand(data.activeHand || "playerHand");
       setStatus(data.status);
+      if (data.status === "blackjack") {
+  const payout = Math.round(betAmount * 2.5);
+  const resultRes = await fetch(`${API_URL}/api/game/result`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      userId: user._id || user.id,
+      won: true,
+      payout,
+    }),
+  });
+  const resultData = await resultRes.json();
+  if (resultData.user) {
+    setUser(resultData.user);
+    localStorage.setItem("user", JSON.stringify(resultData.user));
+  }
+}
       
       
       const pValue = calculateHandValue(data.playerHand);
