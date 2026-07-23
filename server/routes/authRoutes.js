@@ -4,6 +4,8 @@ import passport from "passport";
 import {
   registerUser,
   loginUser,
+  verifyEmail,
+  resendVerificationEmail,
 } from "../controllers/authController.js";
 import "../config/passport.js";
 import User from "../models/User.js";
@@ -15,6 +17,12 @@ router.post("/register", registerUser);
 
 // Login an existing user
 router.post("/login", loginUser);
+
+// Verify a user's email
+router.get("/verify-email/:token", verifyEmail);
+
+// Resend email verification link
+router.post("/resend-verification", resendVerificationEmail);
 
 // Start Google OAuth login
 router.get(

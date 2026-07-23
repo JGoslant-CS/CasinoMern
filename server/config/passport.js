@@ -52,6 +52,11 @@ passport.use(
           email,
           passwordHash: "google_oauth",
           balance: 10,
+
+          // Google has already verified ownership of the email.
+          isVerified: true,
+          verificationToken: null,
+          verificationTokenExpires: null,
         });
 
         return done(null, user);

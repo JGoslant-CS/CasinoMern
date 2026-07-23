@@ -14,6 +14,7 @@ import BlackjackPage from "./pages/BlackjackPage";
 import PlinkoPage from "./pages/PlinkoPage";
 import TexasHoldemPage from "./pages/TexasHoldemPage";
 import GoogleAuthSuccess from "./pages/GoogleAuthSuccess";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
 
 const API_URL = "https://casinomern.onrender.com";
 
@@ -177,6 +178,21 @@ function App() {
 
       if (!res.ok) {
         setMessage(data.error || data.message || "Something went wrong.");
+        return;
+      }
+
+      if (isRegister && data.requiresVerification) {
+        setMessage(
+          data.message ||
+            "Registration successful. Check your email to verify your account."
+        );
+
+        setForm({
+          username: "",
+          email: form.email,
+          password: "",
+        });
+
         return;
       }
 
@@ -365,6 +381,7 @@ function App() {
       <Routes>
         <Route path="/" element={HomePage} />
         <Route path="/auth/google/success" element={<GoogleAuthSuccess setUser={setUser} />} />
+        <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
         <Route path="/slots" element={<SlotsPage user={user} setUser={setUser} />} />
         <Route path="/roulette" element={<RoulettePage user={user} setUser={setUser} />} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
