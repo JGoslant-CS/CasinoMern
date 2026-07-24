@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import "./App.css";
-import rouletteImg from "./assets/roulette.png";
-import blackjackImg from "./assets/blackjack.png";
-import pokerImg from "./assets/poker.png";
+import rouletteImg from "./assets/roulette.jpg";
+import blackjackImg from "./assets/blackjack.jpg";
+import pokerImg from "./assets/poker.jpg";
 import slotImg from "./assets/slot.jpg";
 import cautionImg from "./assets/caution.jpg";
-import plinkoImg from "./assets/plinko.png";
+import plinkoImg from "./assets/plinko.jpg";
 import SlotsPage from "./pages/SlotsPage";
 import RoulettePage from "./pages/RoulettePage";
 import LeaderboardPage from "./pages/LeaderboardPage";
