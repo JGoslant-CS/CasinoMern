@@ -45,7 +45,6 @@ function BlackjackPage({ user, setUser }) {
   const navigate = useNavigate();
 
   const [betAmount, setBetAmount] = useState(1);
-  const [gameId, setGameId] = useState(null);
   const [playerHand, setPlayerHand] = useState([]);
   const [splitHand, setSplitHand] = useState(null);
   const [activeHand, setActiveHand] = useState("playerHand");
@@ -167,11 +166,13 @@ if (!betRes.ok) {
         return;
       }
 
-      setGameId(data.gameId);
       setDeck(data.deck);
       setRealDealerHand(data.realDealerHand);
       setPlayerHand(data.playerHand);
       setDealerHand(data.dealerHand);
+      if (data.deck) {
+        setDeck(data.deck);
+      }
       setSplitHand(data.splitHand || null);
       setActiveHand(data.activeHand || "playerHand");
       setStatus(data.status);
@@ -215,7 +216,14 @@ if (!betRes.ok) {
       const res = await fetch(`${API_URL}/api/game/blackjack/hit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deck, playerHand, dealerHand }),
+        body: JSON.stringify({
+          deck,
+          playerHand,
+          splitHand,
+          activeHand,
+          dealerHand,
+          realDealerHand,
+        }),
       });
 
       const data = await res.json();
@@ -230,6 +238,9 @@ if (!betRes.ok) {
       setDealerHand(data.dealerHand);
       setSplitHand(data.splitHand || null);
       setActiveHand(data.activeHand || "playerHand");
+      if (data.realDealerHand) {
+        setRealDealerHand(data.realDealerHand);
+      }
       setStatus(data.status);
       
       const pValue = calculateHandValue(data.playerHand);
@@ -251,7 +262,13 @@ if (!betRes.ok) {
       const res = await fetch(`${API_URL}/api/game/blackjack/stand`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deck, playerHand, dealerHand: realDealerHand }),
+        body: JSON.stringify({
+          deck,
+          playerHand,
+          splitHand,
+          activeHand,
+          dealerHand: realDealerHand,
+        }),
       });
 
       const data = await res.json();
@@ -320,74 +337,131 @@ if (!betRes.ok) {
   };
 
   const doubleDown = async () => {
-      if (!gameId || status !== "active" || playerHand.length !== 2) return;
-      setLoading(true);
-      try {
-          const res = await fetch(`${API_URL}/api/game/blackjack/double`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ gameId }),
-          });
+    if (
+      status !== "active" ||
+      playerHand.length !== 2 ||
+      !user ||
+      user.balance < betAmount
+    ) {
+      return;
+    }
 
-          const data = await res.json();
-          if (!res.ok) {
-              setMessage(data.message || "Error doubling down.");
-              setLoading(false);
-              return;
-          }
+    setLoading(true);
 
-          setPlayerHand(data.playerHand);
-          setDealerHand(data.dealerHand);
-          setStatus(data.status);
-          if (data.user) {
-              setUser(data.user);
-              localStorage.setItem("user", JSON.stringify(data.user));
-          }
+    try {
+      const res = await fetch(`${API_URL}/api/game/blackjack/double`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          deck,
+          playerHand,
+          dealerHand: realDealerHand,
+          betAmount,
+          userId: user._id || user.id,
+        }),
+      });
 
-          const pValue = calculateHandValue(data.playerHand);
-          const dValue = calculateHandValue(data.dealerHand);
-          setMessage(getStatusMessage(data.status, pValue, dValue, 0));
-          handleStatusEffects(data.status);
-      } catch {
-          setMessage("Could not connect to server.");
+      const data = await res.json();
+
+      if (!res.ok) {
+        setMessage(data.message || "Error doubling down.");
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+
+      setPlayerHand(data.playerHand);
+      setDealerHand(data.dealerHand);
+
+      if (data.deck) {
+        setDeck(data.deck);
+      }
+
+      if (data.realDealerHand) {
+        setRealDealerHand(data.realDealerHand);
+      }
+
+      setStatus(data.status);
+
+      if (data.user) {
+        setUser(data.user);
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
+
+      const pValue = calculateHandValue(data.playerHand);
+      const dValue = calculateHandValue(data.dealerHand);
+
+      setMessage(getStatusMessage(data.status, pValue, dValue, 0));
+      handleStatusEffects(data.status);
+    } catch {
+      setMessage("Could not connect to server.");
+    }
+
+    setLoading(false);
   };
 
   const split = async () => {
-      if (!gameId || status !== "active" || playerHand.length !== 2) return;
-      setLoading(true);
-      try {
-          const res = await fetch(`${API_URL}/api/game/blackjack/split`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ gameId }),
-          });
+    if (
+      status !== "active" ||
+      playerHand.length !== 2 ||
+      !user ||
+      user.balance < betAmount
+    ) {
+      return;
+    }
 
-          const data = await res.json();
-          if (!res.ok) {
-              setMessage(data.message || "Error splitting.");
-              setLoading(false);
-              return;
-          }
+    setLoading(true);
 
-          setPlayerHand(data.playerHand);
-          setDealerHand(data.dealerHand);
-          setSplitHand(data.splitHand);
-          setActiveHand(data.activeHand);
-          setStatus(data.status);
-          if (data.user) {
-              setUser(data.user);
-              localStorage.setItem("user", JSON.stringify(data.user));
-          }
+    try {
+      const res = await fetch(`${API_URL}/api/game/blackjack/split`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          deck,
+          playerHand,
+          dealerHand: realDealerHand,
+          betAmount,
+          userId: user._id || user.id,
+        }),
+      });
 
-          const pValue = calculateHandValue(data.playerHand);
-          const dValue = calculateHandValue(data.dealerHand);
-          setMessage(getStatusMessage(data.status, pValue, dValue, 0));
-      } catch {
-          setMessage("Could not connect to server.");
+      const data = await res.json();
+
+      if (!res.ok) {
+        setMessage(data.message || "Error splitting.");
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+
+      setPlayerHand(data.playerHand);
+      setSplitHand(data.splitHand);
+      setDealerHand(data.dealerHand);
+
+      if (data.deck) {
+        setDeck(data.deck);
+      }
+
+      setActiveHand(data.activeHand || "playerHand");
+
+      if (data.realDealerHand) {
+        setRealDealerHand(data.realDealerHand);
+      }
+
+      setStatus(data.status);
+
+      if (data.user) {
+        setUser(data.user);
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
+
+      const pValue = calculateHandValue(data.playerHand);
+      const dValue = calculateHandValue(data.dealerHand);
+
+      setMessage(getStatusMessage(data.status, pValue, dValue, 0));
+    } catch {
+      setMessage("Could not connect to server.");
+    }
+
+    setLoading(false);
   };
 
   const pValue = calculateHandValue(playerHand);

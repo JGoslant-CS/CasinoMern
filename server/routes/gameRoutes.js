@@ -14,8 +14,8 @@ const router = express.Router();
     startGame, hitCard, standGame
 */
 const startGame = blackjackController.startGame;
-const hit = blackjackController.hit || blackjackController.hitCard;
-const stand = blackjackController.stand || blackjackController.standGame;
+const hit = blackjackController.hit;
+const stand = blackjackController.stand;
 const doubleHand = blackjackController.doubleHand;
 const splitHand = blackjackController.splitHand;
 
