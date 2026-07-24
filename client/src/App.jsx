@@ -7,12 +7,14 @@ import pokerImg from "./assets/poker.jpg";
 import slotImg from "./assets/slot.jpg";
 import cautionImg from "./assets/caution.jpg";
 import plinkoImg from "./assets/plinko.jpg";
+import goFishImg from "./assets/go-fish.png";
 import SlotsPage from "./pages/SlotsPage";
 import RoulettePage from "./pages/RoulettePage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import BlackjackPage from "./pages/BlackjackPage";
 import PlinkoPage from "./pages/PlinkoPage";
 import TexasHoldemPage from "./pages/TexasHoldemPage";
+import GoFishPage from "./pages/GoFishPage";
 import GoogleAuthSuccess from "./pages/GoogleAuthSuccess";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
 
@@ -121,6 +123,16 @@ function App() {
       return;
     }
     navigate("/plinko");
+  };
+
+  const handleGoFishPlay = () => {
+    if (!user) {
+      setMessage("Please log in before playing Go Fish.");
+      setShowLogin(true);
+      return;
+    }
+
+    navigate("/go-fish");
   };
 
   const handleSecretBonus = async () => {
@@ -271,6 +283,7 @@ function App() {
           <GameCard image={pokerImg} icon="♠" title="TEXAS HOLD&apos;EM" desc="Bluff, bet, and win big." button="PLAY TEXAS HOLD&apos;EM" onPlay={handleTexasHoldemPlay} />
           <GameCard image={slotImg} icon="🎰" title="SLOT MACHINE" desc="Spin the reels and chase the jackpot." button="PLAY SLOTS" onPlay={handleSlotsPlay} />
           <GameCard image={plinkoImg} icon="⚪" title="PLINKO" desc="Drop the ball and watch it bounce for massive multipliers." button="PLAY PLINKO" onPlay={handlePlinkoPlay} />
+          <GameCard image={goFishImg} icon="🐟" title="GO FISH" desc="Ask for matching cards, collect books, and defeat the computer." button="PLAY GO FISH" onPlay={handleGoFishPlay} />
           <GameCard image={cautionImg} icon="🚧" title="COMING SOON..." desc="More casino games are being added soon." button="COMING SOON" onPlay={handlePlay} comingSoon={true} />
         </div>
       </section>
@@ -388,6 +401,7 @@ function App() {
         <Route path="/blackjack" element={<BlackjackPage user={user} setUser={setUser} />} />
         <Route path="/plinko" element={<PlinkoPage user={user} setUser={setUser} />} />
         <Route path="/texas-holdem" element={<TexasHoldemPage user={user} setUser={setUser} />} />
+        <Route path="/go-fish" element={<GoFishPage />} />
       </Routes>
     </>
   );

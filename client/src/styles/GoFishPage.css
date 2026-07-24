@@ -1,0 +1,330 @@
+.go-fish-page {
+    min-height: 100vh;
+    background: radial-gradient( circle at top, rgba(0, 95, 65, 0.28), transparent 38% ), #080b0a;
+    color: #ffffff;
+}
+
+.go-fish-nav {
+    width: 100%;
+}
+
+.go-fish-container {
+    width: min(1250px, 92%);
+    margin: 0 auto;
+    padding: 45px 0 80px;
+}
+
+.go-fish-header {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.go-fish-title {
+    margin: 0;
+    font-size: clamp(2.8rem, 7vw, 5rem);
+    font-weight: 900;
+    letter-spacing: 3px;
+}
+
+    .go-fish-title span {
+        color: #f5b942;
+    }
+
+.go-fish-subtitle {
+    margin: 8px 0 0;
+    color: #a9aaa9;
+    font-size: 1rem;
+}
+
+.go-fish-scoreboard {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.go-fish-score {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    padding: 18px;
+    border: 1px solid rgba(245, 185, 66, 0.3);
+    border-radius: 12px;
+    background: rgba(20, 25, 23, 0.94);
+}
+
+    .go-fish-score span {
+        color: #a9aaa9;
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .go-fish-score strong {
+        color: #f5b942;
+        font-size: 2rem;
+    }
+
+.deck-score {
+    border-color: rgba(44, 190, 120, 0.45);
+}
+
+.go-fish-message-box {
+    min-height: 74px;
+    margin-bottom: 28px;
+    padding: 17px 22px;
+    border-left: 4px solid #f5b942;
+    border-radius: 8px;
+    background: rgba(245, 185, 66, 0.08);
+    text-align: center;
+}
+
+    .go-fish-message-box p {
+        margin: 0;
+        color: #f1f1f1;
+        font-size: 1.05rem;
+        font-weight: 700;
+    }
+
+.thinking-text {
+    display: block;
+    margin-top: 7px;
+    color: #f5b942;
+    font-size: 0.85rem;
+}
+
+.computer-area,
+.player-area {
+    margin-bottom: 26px;
+    padding: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 16px;
+    background: linear-gradient( 145deg, rgba(25, 31, 28, 0.97), rgba(12, 15, 14, 0.98) );
+    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.35);
+}
+
+.player-area {
+    border-color: rgba(245, 185, 66, 0.3);
+}
+
+.hand-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 20px;
+}
+
+    .hand-heading h2 {
+        margin: 0;
+        color: #ffffff;
+        font-size: 1.45rem;
+    }
+
+    .hand-heading p {
+        margin: 5px 0 0;
+        color: #929492;
+        font-size: 0.9rem;
+    }
+
+.book-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.book-badge {
+    border-radius: 999px;
+    padding: 7px 11px;
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+
+.player-book {
+    background: rgba(245, 185, 66, 0.15);
+    color: #f5b942;
+}
+
+.computer-book {
+    background: rgba(239, 68, 68, 0.14);
+    color: #ff7878;
+}
+
+.computer-cards,
+.player-cards {
+    display: flex;
+    align-items: center;
+    min-height: 150px;
+    overflow-x: auto;
+    padding: 10px 6px 18px;
+}
+
+.card-back,
+.playing-card-button {
+    width: 95px;
+    min-width: 95px;
+    height: 133px;
+    margin-right: -32px;
+    border-radius: 8px;
+}
+
+.card-back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 5px solid #f3f3f3;
+    background: repeating-linear-gradient( 45deg, #151b43, #151b43 8px, #263a83 8px, #263a83 16px );
+    box-shadow: 0 7px 16px rgba(0, 0, 0, 0.38);
+}
+
+    .card-back span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 61px;
+        height: 96px;
+        border: 2px solid rgba(255, 255, 255, 0.75);
+        color: #ffffff;
+        font-size: 2.4rem;
+    }
+
+.playing-card-button {
+    overflow: hidden;
+    border: none;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    box-shadow: 0 7px 16px rgba(0, 0, 0, 0.38);
+    transition: transform 0.2s ease, margin-right 0.2s ease;
+}
+
+    .playing-card-button:last-child,
+    .card-back:last-child {
+        margin-right: 0;
+    }
+
+    .playing-card-button:hover:not(:disabled) {
+        z-index: 10;
+        margin-right: -10px;
+        transform: translateY(-15px);
+    }
+
+    .playing-card-button:disabled {
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    .playing-card-button img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: fill;
+    }
+
+.rank-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+    .rank-buttons button {
+        border: 1px solid #f5b942;
+        border-radius: 7px;
+        padding: 9px 13px;
+        background: transparent;
+        color: #f5b942;
+        font-weight: 800;
+        cursor: pointer;
+        transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    }
+
+        .rank-buttons button:hover:not(:disabled) {
+            background: #f5b942;
+            color: #101010;
+            transform: translateY(-2px);
+        }
+
+        .rank-buttons button:disabled {
+            cursor: not-allowed;
+            opacity: 0.45;
+        }
+
+.empty-hand-message {
+    width: 100%;
+    color: #8b8b8b;
+    text-align: center;
+}
+
+.go-fish-controls {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.new-go-fish-btn {
+    min-width: 180px;
+    border: none;
+    border-radius: 9px;
+    padding: 14px 24px;
+    background: #f5b942;
+    color: #101010;
+    font-size: 1rem;
+    font-weight: 900;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .new-go-fish-btn:hover:not(:disabled) {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(245, 185, 66, 0.25);
+    }
+
+    .new-go-fish-btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+@media (max-width: 750px) {
+    .go-fish-container {
+        width: 94%;
+        padding-top: 30px;
+    }
+
+    .go-fish-scoreboard {
+        grid-template-columns: 1fr;
+    }
+
+    .hand-heading {
+        flex-direction: column;
+    }
+
+    .book-list {
+        justify-content: flex-start;
+    }
+
+    .computer-area,
+    .player-area {
+        padding: 18px 12px;
+    }
+
+    .card-back,
+    .playing-card-button {
+        width: 78px;
+        min-width: 78px;
+        height: 109px;
+        margin-right: -26px;
+    }
+
+        .card-back span {
+            width: 50px;
+            height: 77px;
+            font-size: 2rem;
+        }
+}
