@@ -4,9 +4,45 @@ import "../App.css";
 import "../styles/TexasHoldemPage.css";
 
 const API_URL = "https://casinomern.onrender.com";
+const DECK_API_URL = "https://deckofcardsapi.com/api/deck";
 
-const SUITS = ["hearts", "diamonds", "clubs", "spades"];
-const VALUES = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
+const convertApiCard = (card) => {
+  const valueMap = {
+    ACE: "A",
+    KING: "K",
+    QUEEN: "Q",
+    JACK: "J",
+  };
+
+  return {
+    suit: card.suit.toLowerCase(),
+    value: valueMap[card.value] || card.value,
+    code: card.code,
+    image: card.image,
+  };
+};
+
+const getShuffledApiDeck = async () => {
+  const shuffleResponse = await fetch(
+    `${DECK_API_URL}/new/shuffle/?deck_count=1`
+  );
+  const shuffleData = await shuffleResponse.json();
+
+  if (!shuffleResponse.ok || shuffleData.success === false) {
+    throw new Error("Could not create a shuffled card deck.");
+  }
+
+  const drawResponse = await fetch(
+    `${DECK_API_URL}/${shuffleData.deck_id}/draw/?count=52`
+  );
+  const drawData = await drawResponse.json();
+
+  if (!drawResponse.ok || drawData.success === false) {
+    throw new Error("Could not draw cards from the Deck of Cards API.");
+  }
+
+  return drawData.cards.map(convertApiCard);
+};
 
 const Card = ({ card, hidden = false }) => {
   if (!card) return null;
@@ -42,32 +78,6 @@ const Card = ({ card, hidden = false }) => {
       </div>
     </div>
   );
-};
-
-const createDeck = () => {
-  const deck = [];
-
-  for (const suit of SUITS) {
-    for (const value of VALUES) {
-      deck.push({ suit, value });
-    }
-  }
-
-  return deck;
-};
-
-const shuffleDeck = (deck) => {
-  const shuffled = [...deck];
-
-  for (let i = shuffled.length - 1; i > 0; i -= 1) {
-    const randomIndex = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[randomIndex]] = [
-      shuffled[randomIndex],
-      shuffled[i],
-    ];
-  }
-
-  return shuffled;
 };
 
 const getNumericValue = (value) => {
@@ -344,7 +354,7 @@ function TexasHoldemPage({ user, setUser }) {
     try {
       await deductCredits(betAmount);
 
-      const shuffledDeck = shuffleDeck(createDeck());
+      const shuffledDeck = await getShuffledApiDeck();
       const playerCards = [shuffledDeck[0], shuffledDeck[2]];
       const dealerCards = [shuffledDeck[1], shuffledDeck[3]];
 
