@@ -7,7 +7,7 @@ import pokerImg from "./assets/poker.jpg";
 import slotImg from "./assets/slot.jpg";
 import cautionImg from "./assets/caution.jpg";
 import plinkoImg from "./assets/plinko.jpg";
-import goFishImg from "./assets/go-fish.png";
+import goFishImg from "./assets/gofish.png";
 import SlotsPage from "./pages/SlotsPage";
 import RoulettePage from "./pages/RoulettePage";
 import LeaderboardPage from "./pages/LeaderboardPage";
