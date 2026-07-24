@@ -268,6 +268,10 @@ if (!betRes.ok) {
           splitHand,
           activeHand,
           dealerHand: realDealerHand,
+
+          // Required when the second split hand is settled.
+          userId: user._id || user.id,
+          betAmount: Number(betAmount),
         }),
       });
 
