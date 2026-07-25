@@ -21,6 +21,7 @@ beforeAll(async () => {
     email: TEST_EMAIL,
     passwordHash,
     balance: 10,
+    isVerified: true,
   });
 });
 
