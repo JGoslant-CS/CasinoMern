@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, lazy, Suspense } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import "./App.css";
 import rouletteImg from "./assets/roulette.jpg";
@@ -8,15 +8,15 @@ import slotImg from "./assets/slot.jpg";
 import cautionImg from "./assets/caution.jpg";
 import plinkoImg from "./assets/plinko.jpg";
 import goFishImg from "./assets/gofish.jpg";
-import SlotsPage from "./pages/SlotsPage";
-import RoulettePage from "./pages/RoulettePage";
-import LeaderboardPage from "./pages/LeaderboardPage";
-import BlackjackPage from "./pages/BlackjackPage";
-import PlinkoPage from "./pages/PlinkoPage";
-import TexasHoldemPage from "./pages/TexasHoldemPage";
-import GoFishPage from "./pages/GoFishPage";
-import GoogleAuthSuccess from "./pages/GoogleAuthSuccess";
-import VerifyEmailPage from "./pages/VerifyEmailPage";
+const SlotsPage = lazy(() => import("./pages/SlotsPage"));
+const RoulettePage = lazy(() => import("./pages/RoulettePage"));
+const LeaderboardPage = lazy(() => import("./pages/LeaderboardPage"));
+const BlackjackPage = lazy(() => import("./pages/BlackjackPage"));
+const PlinkoPage = lazy(() => import("./pages/PlinkoPage"));
+const TexasHoldemPage = lazy(() => import("./pages/TexasHoldemPage"));
+const GoFishPage = lazy(() => import("./pages/GoFishPage"));
+const GoogleAuthSuccess = lazy(() => import("./pages/GoogleAuthSuccess"));
+const VerifyEmailPage = lazy(() => import("./pages/VerifyEmailPage"));
 
 const API_URL = "https://casinomern.onrender.com";
 
@@ -391,18 +391,20 @@ function App() {
         <div className="firework"></div>
         <div className="firework"></div>
       </div>
-      <Routes>
-        <Route path="/" element={HomePage} />
-        <Route path="/auth/google/success" element={<GoogleAuthSuccess setUser={setUser} />} />
-        <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
-        <Route path="/slots" element={<SlotsPage user={user} setUser={setUser} />} />
-        <Route path="/roulette" element={<RoulettePage user={user} setUser={setUser} />} />
-        <Route path="/leaderboard" element={<LeaderboardPage />} />
-        <Route path="/blackjack" element={<BlackjackPage user={user} setUser={setUser} />} />
-        <Route path="/plinko" element={<PlinkoPage user={user} setUser={setUser} />} />
-        <Route path="/texas-holdem" element={<TexasHoldemPage user={user} setUser={setUser} />} />
-        <Route path="/go-fish" element={<GoFishPage />} />
-      </Routes>
+      <Suspense fallback={<div className="page-loading">Loading...</div>}>
+        <Routes>
+          <Route path="/" element={HomePage} />
+          <Route path="/auth/google/success" element={<GoogleAuthSuccess setUser={setUser} />} />
+          <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
+          <Route path="/slots" element={<SlotsPage user={user} setUser={setUser} />} />
+          <Route path="/roulette" element={<RoulettePage user={user} setUser={setUser} />} />
+          <Route path="/leaderboard" element={<LeaderboardPage />} />
+          <Route path="/blackjack" element={<BlackjackPage user={user} setUser={setUser} />} />
+          <Route path="/plinko" element={<PlinkoPage user={user} setUser={setUser} />} />
+          <Route path="/texas-holdem" element={<TexasHoldemPage user={user} setUser={setUser} />} />
+          <Route path="/go-fish" element={<GoFishPage />} />
+        </Routes>
+      </Suspense>
     </>
   );
 }
