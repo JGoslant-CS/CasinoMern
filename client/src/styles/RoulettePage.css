@@ -112,7 +112,7 @@
 	aspect-ratio: 1;
 	border: 12px solid #926622;
 	border-radius: 50%;
-	background: radial-gradient( circle, #071426 0 29%, transparent 30% ), repeating-conic-gradient( from -4.86deg, #0d1726 0deg 4.86deg, #a61120 4.86deg 9.72deg );
+    background: #0d1726;
 	box-shadow: 0 0 0 7px #d7a943, 0 0 0 14px #39240b, 0 0 45px rgba(0, 191, 255, 0.4), inset 0 0 45px rgba(0, 0, 0, 0.85);
 	transition: transform 5.2s cubic-bezier(0.12, 0.62, 0.12, 1);
 	will-change: transform;

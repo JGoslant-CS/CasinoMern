@@ -57,6 +57,17 @@ function RoulettePage({ user, setUser }) {
       rotation: index * numberAngle,
     }));
   }, [numberAngle]);
+  const wedgeColors = { red: "#a61120", black: "#0d1726", green: "#078344" };
+  const wheelWedgeGradient = useMemo(() => {
+    const stops = pockets
+      .map((pocket) => {
+        const start = pocket.index * numberAngle;
+        const end = start + numberAngle;
+        return `${wedgeColors[pocket.color]} ${start}deg ${end}deg`;
+      })
+      .join(", ");
+    return `radial-gradient(circle, #071426 0 29%, transparent 30%), conic-gradient(from ${-numberAngle / 2}deg, ${stops})`;
+  }, [pockets, numberAngle]);
 
   const updateStoredUser = (balance) => {
     const updatedUser = {
@@ -244,6 +255,7 @@ function RoulettePage({ user, setUser }) {
               }`}
               style={{
                 transform: `rotate(${wheelRotation}deg)`,
+                backgroundImage: wheelWedgeGradient,
               }}
             >
               <div className="roulette-pocket-ring">
