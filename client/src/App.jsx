@@ -51,6 +51,9 @@ function App() {
   }, [location.pathname]);
 
   const [showLogin, setShowLogin] = useState(false);
+  const [showAdModal, setShowAdModal] = useState(false);
+  const [adWatched, setAdWatched] = useState(false);
+  const ytPlayerRef = useRef(null);
   const [showLogout, setShowLogout] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
   const [form, setForm] = useState({ username: "", email: "", password: "" });
@@ -166,6 +169,84 @@ function App() {
     }
   };
 
+  const handleWatchAd = () => {
+    if (!user) {
+      setMessage("Please login or register to watch an ad for credits.");
+      setIsRegister(false);
+      setShowLogin(true);
+      return;
+    }
+    setAdWatched(false);
+    setShowAdModal(true);
+  };
+
+  const handleAdComplete = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/game/bonus`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user._id || user.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.message || "Could not add ad reward credits.");
+        return;
+      }
+      const updatedUser = { ...user, balance: data.balance ?? data.credits };
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      setAdWatched(true);
+    } catch {
+      alert("Could not connect to the server.");
+    }
+  };
+
+  const closeAdModal = () => {
+    setShowAdModal(false);
+    setAdWatched(false);
+    if (ytPlayerRef.current && ytPlayerRef.current.destroy) {
+      ytPlayerRef.current.destroy();
+      ytPlayerRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    if (!showAdModal) return;
+
+    const createPlayer = () => {
+      ytPlayerRef.current = new window.YT.Player("ad-yt-player", {
+        height: "100%",
+        width: "100%",
+        videoId: "v0TjnM4fBE4",
+        playerVars: { autoplay: 1, rel: 0 },
+        events: {
+          onStateChange: (event) => {
+            if (event.data === window.YT.PlayerState.ENDED) {
+              handleAdComplete();
+            }
+          },
+        },
+      });
+    };
+
+    if (window.YT && window.YT.Player) {
+      createPlayer();
+    } else {
+      const tag = document.createElement("script");
+      tag.src = "https://www.youtube.com/iframe_api";
+      document.body.appendChild(tag);
+      window.onYouTubeIframeAPIReady = createPlayer;
+    }
+
+    return () => {
+      if (ytPlayerRef.current && ytPlayerRef.current.destroy) {
+        ytPlayerRef.current.destroy();
+        ytPlayerRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showAdModal]);
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -251,6 +332,9 @@ function App() {
         </div>
 
         <div className="nav-actions" style={{ display: "flex", gap: "15px", alignItems: "center" }}>
+          <button className="leaderboard-btn" onClick={handleWatchAd}>
+            🎬 Watch Ad +10
+          </button>
           <button className="leaderboard-btn" onClick={() => navigate("/leaderboard")}>
             🏆 Leaderboard
           </button>
@@ -376,6 +460,27 @@ function App() {
             <h2>Logout?</h2>
             <p className="switch-text">Do you want to log out of your account?</p>
             <button className="modal-submit" onClick={handleLogout}>Logout</button>
+          </div>
+        </div>
+      )}
+      {showAdModal && (
+        <div className="modal-overlay">
+          <div className="login-modal ad-modal">
+            <button className="close-btn" onClick={closeAdModal}>×</button>
+            <h2>Watch Ad for +10 Credits</h2>
+            <p className="switch-text">
+              {adWatched
+                ? "Reward claimed! You can close this window."
+                : "Watch the full video to earn your reward."}
+            </p>
+            <div className="ad-video-wrapper">
+              <div id="ad-yt-player"></div>
+            </div>
+            {adWatched && (
+              <button className="modal-submit" onClick={closeAdModal}>
+                Close
+              </button>
+            )}
           </div>
         </div>
       )}
