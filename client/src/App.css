@@ -438,3 +438,12 @@ footer {
         opacity: 0;
     }
 }
+
+.logo-icon-clickable {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 4px;
+}

@@ -236,7 +236,7 @@ function App() {
             <p>MERN</p>
           </div>
           <span
-            className="logo-icon"
+            className="logo-icon logo-icon-clickable"
             onClick={handleSecretBonus}
             title="Feeling lucky?"
             role="button"
@@ -391,6 +391,7 @@ function App() {
         <div className="firework"></div>
         <div className="firework"></div>
       </div>
+      <main>
       <Suspense fallback={<div className="page-loading">Loading...</div>}>
         <Routes>
           <Route path="/" element={HomePage} />
@@ -405,6 +406,7 @@ function App() {
           <Route path="/go-fish" element={<GoFishPage />} />
         </Routes>
       </Suspense>
+      </main>
     </>
   );
 }
