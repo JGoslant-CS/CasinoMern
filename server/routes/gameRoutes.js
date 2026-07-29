@@ -4,6 +4,51 @@ import * as blackjackController from "../controllers/blackjackController.js";
 
 const router = express.Router();
 
+/* =========================================================
+   TODAY'S LUCKY NUMBER
+   Cached in memory per calendar day so every visitor sees
+   the same number, and Random.org is only called once a day.
+========================================================= */
+
+let cachedLuckyNumber = null;
+let cachedLuckyDate = null;
+
+router.get("/lucky-number", async (req, res) => {
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+
+    if (cachedLuckyDate === today && cachedLuckyNumber !== null) {
+      return res.json({ number: cachedLuckyNumber, date: today });
+    }
+
+    const response = await fetch(
+      "https://www.random.org/integers/?num=1&min=0&max=36&col=1&base=10&format=plain&rnd=new"
+    );
+
+    if (!response.ok) {
+      throw new Error("Random.org request failed.");
+    }
+
+    const text = await response.text();
+    const number = Number.parseInt(text.trim(), 10);
+
+    if (!Number.isInteger(number)) {
+      throw new Error("Invalid response from Random.org.");
+    }
+
+    cachedLuckyNumber = number;
+    cachedLuckyDate = today;
+
+    res.json({ number, date: today });
+  } catch (error) {
+    console.error("Lucky number error:", error);
+
+    res.status(500).json({
+      message: "Could not fetch today's lucky number.",
+    });
+  }
+});
+
 /*
   Supports either version of blackjackController.js:
 

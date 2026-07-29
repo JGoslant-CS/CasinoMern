@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/RoulettePage.css";
 
@@ -46,6 +46,26 @@ function RoulettePage({ user, setUser }) {
   const [ballRotation, setBallRotation] = useState(0);
   const [ballDropping, setBallDropping] = useState(false);
   const [winningNumber, setWinningNumber] = useState(null);
+  const [luckyNumber, setLuckyNumber] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    fetch(`${API_URL}/api/game/lucky-number`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted && typeof data.number === "number") {
+          setLuckyNumber(data.number);
+        }
+      })
+      .catch(() => {
+        // Fail silently -- this is a fun extra, not core gameplay.
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const numberAngle = 360 / rouletteNumbers.length;
 
@@ -317,6 +337,11 @@ function RoulettePage({ user, setUser }) {
           </section>
 
           <section className="roulette-controls">
+            {luckyNumber !== null && (
+              <p className="lucky-number-banner">
+                🍀 Today's Lucky Number: <strong>{luckyNumber}</strong>
+              </p>
+            )}
             <h2>Place Your Bet</h2>
 
             <label className="roulette-label" htmlFor="bet-amount">
