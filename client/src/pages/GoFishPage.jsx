@@ -565,9 +565,6 @@ function GoFishPage() {
             GO <span>FISH</span>
           </h1>
 
-          <p className="go-fish-subtitle">
-            Powered by the Deck of Cards third-party API
-          </p>
         </header>
 
         <section className="go-fish-scoreboard">
